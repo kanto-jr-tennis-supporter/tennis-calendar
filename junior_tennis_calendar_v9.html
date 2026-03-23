@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>関東ジュニアテニス 大会カレンダー 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --surface: #181c27;
+  --surface2: #1e2334;
+  --surface3: #252b3e;
+  --border: #2e3650;
+  --text: #e8ecf4;
+  --text2: #8b95b0;
+  --text3: #545e78;
+  --accent: #4fc3f7;
+
+  --g1: #ff3b3b;
+  --g2: #ff7043;
+  --g3a: #ffb300;
+  --g3b: #ffd54f;
+  --g4a: #66bb6a;
+  --g4b: #4db6ac;
+  --g4c: #42a5f5;
+  --g4d: #7e8da8;
+  --itf: #ce93d8;
+  --gakuren: #80cbc4;
+  --deadline: #ff4081;
+  --yosen: #a5d6a7;
+  --honsen: #fff176;
+  --yobi: #b0bec5;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: linear-gradient(135deg, #0d1b3e 0%, #1a0533 50%, #0d1b3e 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.header-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #fff;
+}
+.header-title span {
+  color: var(--accent);
+}
+.header-year {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 2px;
+}
+
+/* ===== FILTERS ===== */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 10px;
+}
+.filter-label {
+  font-size: 10px;
+  color: var(--text3);
+  font-weight: 700;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.filter-btn {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.filter-btn:hover { background: var(--surface3); color: var(--text); }
+.filter-btn.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+.filter-btn.age-active-1 { background: #4fc3f7; color: #000; border-color: #4fc3f7; }
+.filter-btn.age-active-2 { background: #f48fb1; color: #000; border-color: #f48fb1; }
+
+.grade-btn { color: var(--text2); }
+.grade-btn.active { color: #000 !important; }
+
+select.filter-select {
+  font-size: 11px;
+  background: transparent;
+  color: var(--text2);
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+select.filter-select option { background: var(--surface2); }
+
+.reset-btn {
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #ff4081;
+  background: transparent;
+  color: #ff4081;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: all 0.15s;
+}
+.reset-btn:hover { background: #ff4081; color: #fff; }
+
+/* ===== COUNT BAR ===== */
+.count-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.count-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.count-label { font-size: 11px; color: var(--text3); }
+.legend-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+  align-items: center;
+}
+.leg { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text3); }
+.leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.leg-line { width: 12px; height: 3px; flex-shrink: 0; border-radius: 1px; }
+
+/* ===== MAIN LAYOUT ===== */
+.main {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  height: calc(100vh - 140px);
+  min-height: 500px;
+}
+
+/* ===== GANTT ===== */
+.gantt-wrap {
+  overflow: auto;
+  position: relative;
+}
+.gantt-container {
+  position: relative;
+  min-width: 1200px;
+}
+
+.gantt-header {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+}
+.gantt-label-col {
+  min-width: 260px;
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--surface);
+  position: sticky;
+  left: 36px;
+  z-index: 25;
+  border-right: 1px solid var(--border);
+}
+.gantt-grade-col {
+  min-width: 44px;
+  width: 44px;
+  flex-shrink: 0;
+  background: var(--surface);
+  position: sticky;
+  left: 220px;
+  z-index: 25;
+  border-right: 2px solid var(--border);
+}
+.gantt-timeline {
+  flex: 1;
+  position: relative;
+}
+
+.month-headers {
+  display: flex;
+  height: 24px;
+}
+.month-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  border-right: 1px solid var(--border);
+  color: var(--text2);
+  flex-shrink: 0;
+}
+
+.day-headers {
+  display: flex;
+  height: 18px;
+  background: var(--surface2);
+}
+.day-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: var(--text3);
+  border-right: 1px solid #1a2030;
+  flex-shrink: 0;
+}
+.day-cell.week-start { border-right: 1px solid #2e3650; }
+
+/* Rows */
+.gantt-body { }
+.gantt-row {
+  display: flex;
+  height: 60px;
+  border-bottom: 1px solid #191e2d;
+  transition: background 0.1s;
+}
+.gantt-row:hover { background: rgba(255,255,255,0.03); }
+.gantt-row-label {
+  min-width: 220px;
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 10px;
+  color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--surface);
+  position: sticky;
+  left: 36px;
+  z-index: 10;
+  cursor: pointer;
+  border-right: 1px solid var(--border);
+}
+.gantt-row-label:hover { color: var(--text); }
+.gantt-row-grade {
+  min-width: 44px;
+  width: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--surface);
+  position: sticky;
+  left: 220px;
+  z-index: 10;
+  border-right: 2px solid var(--border);
+}
+.gantt-row-timeline {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.month-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  opacity: 0.03;
+  pointer-events: none;
+}
+.month-sep-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.bar {
+  position: absolute;
+  height: 14px;
+  top: 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+  z-index: 2;
+}
+.bar:hover {
+  filter: brightness(1.3);
+  transform: scaleY(1.2);
+  z-index: 5;
+}
+
+.marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  z-index: 3;
+  pointer-events: none;
+}
+.marker-deadline { background: var(--deadline); }
+.marker-yosen { background: var(--yosen); }
+.marker-honsen { background: var(--honsen); }
+.marker-yobi { background: var(--yobi); }
+
+.marker-flag {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 0; height: 0;
+  border-top: 5px solid;
+  border-right: 5px solid transparent;
+}
+.flag-deadline { border-top-color: var(--deadline); }
+.flag-yosen { border-top-color: var(--yosen); }
+.flag-honsen { border-top-color: var(--honsen); }
+.flag-yobi { border-top-color: var(--yobi); }
+
+.today-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #fff;
+  opacity: 0.3;
+  z-index: 4;
+  pointer-events: none;
+}
+.today-line::after {
+  content: 'TODAY';
+  position: absolute;
+  top: -18px;
+  left: -18px;
+  font-size: 8px;
+  color: rgba(255,255,255,0.5);
+  font-family: 'Barlow Condensed', sans-serif;
+  letter-spacing: 1px;
+}
+
+/* ===== TOOLTIP ===== */
+.tooltip {
+  position: fixed;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 11px;
+  max-width: 280px;
+  z-index: 1000;
+  pointer-events: none;
+  display: none;
+  line-height: 1.7;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+.tooltip-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.tooltip-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.tooltip-key { color: var(--text3); min-width: 56px; font-size: 10px; }
+.tooltip-val { color: var(--text); font-weight: 500; }
+.tooltip-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #000;
+}
+
+/* ===== SIDE PANEL ===== */
+.side-panel {
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+}
+.side-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.side-tab {
+  flex: 1;
+  padding: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  color: var(--text3);
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.side-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(79,195,247,0.05);
+}
+.side-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+.side-section { display: none; }
+.side-section.active { display: block; }
+
+/* Entry form */
+.entry-search {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 11px;
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  margin-bottom: 10px;
+  outline: none;
+}
+.entry-search:focus { border-color: var(--accent); }
+
+.entry-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.entry-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 10px;
+}
+.entry-item:hover { border-color: var(--accent); background: var(--surface3); }
+.entry-item.selected { border-color: var(--accent); background: rgba(79,195,247,0.1); }
+.entry-item-name { font-size: 11px; color: var(--text); margin-bottom: 2px; font-weight: 500; }
+.entry-item-meta { color: var(--text3); }
+
+.entry-form {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  display: none;
+}
+.entry-form.visible { display: block; }
+.entry-form-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  line-height: 1.4;
+}
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+.form-key {
+  font-size: 10px;
+  color: var(--text3);
+  min-width: 64px;
+  font-weight: 500;
+}
+.form-input {
+  flex: 1;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 7px;
+  font-size: 11px;
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  outline: none;
+}
+.form-input:focus { border-color: var(--accent); }
+.form-marker-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.save-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: all 0.15s;
+}
+.save-btn:hover { background: #81d4fa; }
+.saved-badge {
+  display: none;
+  text-align: center;
+  font-size: 10px;
+  color: #66bb6a;
+  margin-top: 6px;
+  font-weight: 700;
+}
+
+/* Check conflicts */
+.conflict-section { }
+.conflict-item {
+  background: var(--surface2);
+  border: 1px solid #ff4081;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  font-size: 10px;
+}
+.conflict-title { font-size: 11px; color: #ff4081; font-weight: 700; margin-bottom: 4px; }
+.conflict-name { color: var(--text); margin-bottom: 2px; }
+.conflict-meta { color: var(--text3); }
+.no-conflict {
+  text-align: center;
+  padding: 30px 0;
+  color: var(--text3);
+  font-size: 12px;
+}
+.no-conflict .icon { font-size: 28px; margin-bottom: 8px; }
+
+/* URL list */
+.url-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 5px;
+  font-size: 10px;
+}
+.url-name { color: var(--text); font-weight: 500; margin-bottom: 3px; font-size: 11px; }
+.url-link { color: var(--accent); text-decoration: none; word-break: break-all; }
+.url-link:hover { text-decoration: underline; }
+.url-grade { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; color: #000; margin-left: 4px; }
+
+/* Entry checkbox column */
+.gantt-check-col {
+  min-width: 36px;
+  width: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  position: sticky;
+  left: 0;
+  z-index: 11;
+  border-right: 1px solid var(--border);
+}
+.gantt-label-col { left: 36px !important; }
+.gantt-grade-col { left: 296px !important; }
+
+.entry-check {
+  width: 15px; height: 15px;
+  cursor: pointer;
+  accent-color: #4caf50;
+}
+.gantt-row.is-entered .gantt-row-label {
+  color: #4caf50;
+  font-weight: 700;
+}
+.gantt-row.is-entered .gantt-check-col {
+  background: rgba(76,175,80,0.08);
+}
+.gantt-row.is-expired-row {
+  opacity: 0.3;
+}
+.entered-badge {
+  display: inline-block;
+  background: #4caf50;
+  color: #000;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* Show-expired toggle */
+.toggle-expired {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.toggle-expired.active { border-color: #ff7043; color: #ff7043; }
+
+/* Form section labels */
+.form-section-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+.mode-toggle {
+  display: flex;
+  gap: 3px;
+  margin-left: auto;
+}
+.mode-btn {
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: all 0.12s;
+}
+.mode-btn.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+.date-pick-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.date-pick-row .form-input { flex: 1; }
+.remove-date-btn {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1px solid #ff4081;
+  background: transparent;
+  color: #ff4081;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+}
+.add-date-btn {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  width: 100%;
+  margin-top: 2px;
+  transition: all 0.12s;
+}
+.add-date-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Double entry warning */
+.de-warning {
+  background: rgba(255,64,129,0.12);
+  border: 1px solid #ff4081;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  font-size: 10px;
+}
+.de-warning-title { color: #ff4081; font-weight: 700; margin-bottom: 4px; font-size: 11px; }
+.de-warning-names { color: var(--text); line-height: 1.6; }
+.de-off { opacity: 0.5; text-decoration: line-through; }
+
+/* Add tournament form */
+.add-form-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.add-age-label {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text2);
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.add-age-label:hover { border-color: var(--accent); }
+.add-age-label input { accent-color: var(--accent); }
+.custom-tournament-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 7px;
+  padding: 7px 10px;
+  margin-bottom: 5px;
+  font-size: 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+}
+.custom-tournament-name { color: var(--text); font-size: 11px; font-weight: 500; margin-bottom: 2px; }
+.custom-tournament-meta { color: var(--text3); }
+.delete-custom-btn {
+  background: transparent;
+  border: none;
+  color: #ff4081;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Warning toggle button in filter bar */
+.warn-toggle-btn {
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid #ff4081;
+  background: rgba(255,64,129,0.15);
+  color: #ff4081;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: all 0.15s;
+  white-space: nowrap;
+  font-weight: 700;
+}
+.warn-toggle-btn.off {
+  background: transparent;
+  color: var(--text3);
+  border-color: var(--border);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3e4a6e; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="header-year">KANTO JUNIOR TENNIS</div>
+      <div class="header-title">大会カレンダー <span>2026</span></div>
+    </div>
+    <button class="reset-btn" onclick="resetFilters()">リセット</button>
+    <button class="warn-toggle-btn" id="warnToggleBtn" onclick="toggleWarnMode()">⚠ ダブルエントリー警告 ON</button>
+  </div>
+  <div class="filters">
+    <!-- 年齢 -->
+    <div class="filter-group">
+      <span class="filter-label">AGE（最大2選択）</span>
+      <button class="filter-btn" data-age="U12" onclick="toggleAge(this)">U12</button>
+      <button class="filter-btn" data-age="U14" onclick="toggleAge(this)">U14</button>
+      <button class="filter-btn" data-age="U16" onclick="toggleAge(this)">U16</button>
+      <button class="filter-btn" data-age="U18" onclick="toggleAge(this)">U18</button>
+    </div>
+    <!-- 男女 -->
+    <div class="filter-group">
+      <span class="filter-label">GENDER</span>
+      <button class="filter-btn" data-gender="男" onclick="toggleSingle(this,'gender')">男</button>
+      <button class="filter-btn" data-gender="女" onclick="toggleSingle(this,'gender')">女</button>
+    </div>
+    <!-- S/D -->
+    <div class="filter-group">
+      <span class="filter-label">種目</span>
+      <button class="filter-btn" data-sd="S" onclick="toggleMulti(this,'sd')">S</button>
+      <button class="filter-btn" data-sd="D" onclick="toggleMulti(this,'sd')">D</button>
+    </div>
+    <!-- グレード -->
+    <div class="filter-group">
+      <span class="filter-label">GRADE</span>
+      <button class="filter-btn grade-btn" data-grade="G1" onclick="toggleGrade(this)" style="color:var(--g1)">G1</button>
+      <button class="filter-btn grade-btn" data-grade="G2" onclick="toggleGrade(this)" style="color:var(--g2)">G2</button>
+      <button class="filter-btn grade-btn" data-grade="G3A" onclick="toggleGrade(this)" style="color:var(--g3a)">G3A</button>
+      <button class="filter-btn grade-btn" data-grade="G3B" onclick="toggleGrade(this)" style="color:var(--g3b)">G3B</button>
+      <button class="filter-btn grade-btn" data-grade="G4A" onclick="toggleGrade(this)" style="color:var(--g4a)">G4A</button>
+      <button class="filter-btn grade-btn" data-grade="G4B" onclick="toggleGrade(this)" style="color:var(--g4b)">G4B</button>
+      <button class="filter-btn grade-btn" data-grade="G4C" onclick="toggleGrade(this)" style="color:var(--g4c)">G4C</button>
+      <button class="filter-btn grade-btn" data-grade="G4D" onclick="toggleGrade(this)" style="color:var(--g4d)">G4D</button>
+      <button class="filter-btn grade-btn" data-grade="ITF" onclick="toggleGrade(this)" style="color:var(--itf)">ITF</button>
+    </div>
+    <!-- 月 -->
+    <div class="filter-group">
+      <span class="filter-label">MONTH</span>
+      <select class="filter-select" id="monthSelect" onchange="renderGantt()">
+        <option value="0">全期間</option>
+        <option value="2">2月</option><option value="3">3月</option><option value="4">4月</option>
+        <option value="5">5月</option><option value="6">6月</option><option value="7">7月</option>
+        <option value="8">8月</option><option value="9">9月</option><option value="10">10月</option>
+        <option value="11">11月</option><option value="12">12月</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="count-bar">
+  <span class="count-num" id="countNum">0</span>
+  <span class="count-label">大会表示中</span>
+  <button class="toggle-expired" id="toggleExpiredBtn" onclick="toggleExpired()">終了済みを隠す</button>
+  <div class="legend-inline">
+    <div class="leg"><div class="leg-line" style="background:var(--deadline)"></div>締切日</div>
+    <div class="leg"><div class="leg-line" style="background:var(--yosen)"></div>予選</div>
+    <div class="leg"><div class="leg-line" style="background:var(--honsen)"></div>本戦</div>
+    <div class="leg"><div class="leg-line" style="background:var(--yobi)"></div>予備日</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--g1)"></div>G1</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--g2)"></div>G2</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--g3a)"></div>G3A</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--g3b)"></div>G3B</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--g4a)"></div>G4A</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--g4b)"></div>G4B</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--g4c)"></div>G4C</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--g4d)"></div>G4D</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--itf)"></div>ITF</div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- GANTT -->
+  <div class="gantt-wrap" id="ganttWrap">
+    <div class="gantt-container" id="ganttContainer"></div>
+  </div>
+
+  <!-- SIDE PANEL -->
+  <div class="side-panel">
+    <div class="side-tabs">
+      <div class="side-tab active" onclick="switchTab('entry')">手入力・詳細</div>
+      <div class="side-tab" onclick="switchTab('conflict')">重複チェック</div>
+      <div class="side-tab" onclick="switchTab('add')">＋追加</div>
+      <div class="side-tab" onclick="switchTab('urls')">URL一覧</div>
+    </div>
+    <div class="side-content">
+
+      <!-- Entry Section -->
+      <div class="side-section active" id="tab-entry">
+        <p style="font-size:10px;color:var(--text3);margin-bottom:8px">大会を選択して詳細日程を入力</p>
+        <input class="entry-search" type="text" placeholder="大会名で検索..." id="entrySearch" oninput="filterEntryList()">
+        <div class="entry-list" id="entryList"></div>
+        <div class="entry-form" id="entryForm">
+          <div class="entry-form-title" id="entryFormTitle"></div>
+
+          <!-- 締切日 -->
+          <div class="form-section-label">
+            <div class="form-marker-dot" style="background:var(--deadline)"></div>
+            締切日
+          </div>
+          <div class="form-row">
+            <input class="form-input" type="date" id="inp-deadline">
+          </div>
+
+          <!-- 予選日 -->
+          <div class="form-section-label" style="margin-top:8px">
+            <div class="form-marker-dot" style="background:var(--yosen)"></div>
+            予選日
+            <div class="mode-toggle">
+              <button class="mode-btn active" id="yosen-mode-range" onclick="setMode('yosen','range')">範囲</button>
+              <button class="mode-btn" id="yosen-mode-pick" onclick="setMode('yosen','pick')">個別</button>
+            </div>
+          </div>
+          <div id="yosen-range-input">
+            <div class="form-row">
+              <input class="form-input" type="date" id="inp-yosen-start">
+              <span style="color:var(--text3);font-size:10px;padding:0 2px">〜</span>
+              <input class="form-input" type="date" id="inp-yosen-end">
+            </div>
+          </div>
+          <div id="yosen-pick-input" style="display:none">
+            <div id="yosen-dates-container"></div>
+            <button class="add-date-btn" onclick="addDatePick('yosen')">＋ 日付を追加</button>
+          </div>
+
+          <!-- 本戦日 -->
+          <div class="form-section-label" style="margin-top:8px">
+            <div class="form-marker-dot" style="background:var(--honsen)"></div>
+            本戦日
+            <div class="mode-toggle">
+              <button class="mode-btn active" id="honsen-mode-range" onclick="setMode('honsen','range')">範囲</button>
+              <button class="mode-btn" id="honsen-mode-pick" onclick="setMode('honsen','pick')">個別</button>
+            </div>
+          </div>
+          <div id="honsen-range-input">
+            <div class="form-row">
+              <input class="form-input" type="date" id="inp-honsen-start">
+              <span style="color:var(--text3);font-size:10px;padding:0 2px">〜</span>
+              <input class="form-input" type="date" id="inp-honsen-end">
+            </div>
+          </div>
+          <div id="honsen-pick-input" style="display:none">
+            <div id="honsen-dates-container"></div>
+            <button class="add-date-btn" onclick="addDatePick('honsen')">＋ 日付を追加</button>
+          </div>
+
+          <!-- 予備日 -->
+          <div class="form-section-label" style="margin-top:8px">
+            <div class="form-marker-dot" style="background:var(--yobi)"></div>
+            予備日
+          </div>
+          <div class="form-row">
+            <input class="form-input" type="date" id="inp-yobi">
+          </div>
+
+          <!-- メモ・URL -->
+          <div class="form-row" style="margin-top:8px">
+            <span class="form-key" style="color:var(--text3)">メモ</span>
+            <input class="form-input" type="text" id="inp-memo" placeholder="自由記入">
+          </div>
+          <div class="form-row">
+            <span class="form-key" style="color:var(--text3)">URL</span>
+            <input class="form-input" type="text" id="inp-url" placeholder="https://...">
+          </div>
+
+          <button class="save-btn" onclick="saveEntry()">保存してガントチャートに反映</button>
+          <div class="saved-badge" id="savedBadge">✓ 保存しました！</div>
+        </div>
+      </div>
+
+      <!-- Conflict Section -->
+      <div class="side-section" id="tab-conflict">
+        <p style="font-size:10px;color:var(--text3);margin-bottom:10px">エントリー済み大会の日程重複を自動検出</p>
+        <div id="conflictList"></div>
+      </div>
+
+      <!-- Add Tournament Section -->
+      <div class="side-section" id="tab-add">
+        <p style="font-size:10px;color:var(--text3);margin-bottom:10px">テニスベア・JOP等で見つけた大会を追加</p>
+
+        <div class="add-form-card">
+          <div class="form-section-label" style="margin-bottom:8px;font-size:11px;color:var(--text)">大会基本情報</div>
+
+          <div class="form-row" style="margin-bottom:6px">
+            <span class="form-key" style="min-width:52px">大会名</span>
+            <input class="form-input" type="text" id="add-name" placeholder="例: 第40回 まちだ成瀬ジュニア">
+          </div>
+          <div class="form-row" style="margin-bottom:6px">
+            <span class="form-key" style="min-width:52px">グレード</span>
+            <select class="form-input" id="add-grade">
+              <option value="G1">G1</option>
+              <option value="G2">G2</option>
+              <option value="G3A">G3A</option>
+              <option value="G3B">G3B</option>
+              <option value="G4A">G4A</option>
+              <option value="G4B">G4B</option>
+              <option value="G4C" selected>G4C</option>
+              <option value="G4D">G4D</option>
+              <option value="ITF">ITF</option>
+            </select>
+          </div>
+          <div class="form-row" style="margin-bottom:6px">
+            <span class="form-key" style="min-width:52px">開始日</span>
+            <input class="form-input" type="date" id="add-start">
+            <span style="color:var(--text3);font-size:10px;padding:0 2px">〜</span>
+            <input class="form-input" type="date" id="add-end">
+          </div>
+
+          <div class="form-section-label" style="margin:8px 0 4px;font-size:10px">対象年齢（複数選択可）</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+            <label class="add-age-label"><input type="checkbox" value="12" class="add-age-cb"> U12</label>
+            <label class="add-age-label"><input type="checkbox" value="14" class="add-age-cb"> U14</label>
+            <label class="add-age-label"><input type="checkbox" value="16" class="add-age-cb"> U16</label>
+            <label class="add-age-label"><input type="checkbox" value="18" class="add-age-cb"> U18</label>
+          </div>
+
+          <div class="form-section-label" style="margin-bottom:4px;font-size:10px">性別・種目</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+            <label class="add-age-label"><input type="checkbox" value="男" class="add-gender-cb" checked> 男</label>
+            <label class="add-age-label"><input type="checkbox" value="女" class="add-gender-cb" checked> 女</label>
+            <label class="add-age-label" style="margin-left:8px"><input type="checkbox" value="S" class="add-sd-cb" checked> S</label>
+            <label class="add-age-label"><input type="checkbox" value="D" class="add-sd-cb"> D</label>
+          </div>
+
+          <div class="form-row" style="margin-bottom:6px">
+            <span class="form-key" style="min-width:52px">URL</span>
+            <input class="form-input" type="text" id="add-url" placeholder="https://www.tennisbear.net/...">
+          </div>
+          <div class="form-row" style="margin-bottom:6px">
+            <span class="form-key" style="min-width:52px">メモ</span>
+            <input class="form-input" type="text" id="add-memo" placeholder="例: JOPより追加">
+          </div>
+
+          <div class="form-section-label" style="margin:8px 0 4px;font-size:10px">締切日・本戦日（わかれば）</div>
+          <div class="form-row" style="margin-bottom:4px">
+            <div class="form-marker-dot" style="background:var(--deadline)"></div>
+            <span class="form-key" style="min-width:44px">締切</span>
+            <input class="form-input" type="date" id="add-deadline">
+          </div>
+          <div class="form-row" style="margin-bottom:4px">
+            <div class="form-marker-dot" style="background:var(--honsen)"></div>
+            <span class="form-key" style="min-width:44px">本戦</span>
+            <input class="form-input" type="date" id="add-honsen-start">
+            <span style="color:var(--text3);font-size:10px;padding:0 2px">〜</span>
+            <input class="form-input" type="date" id="add-honsen-end">
+          </div>
+
+          <button class="save-btn" style="margin-top:10px" onclick="addCustomTournament()">ガントチャートに追加</button>
+          <div class="saved-badge" id="addBadge">✓ 追加しました！</div>
+        </div>
+
+        <!-- 追加済み大会一覧 -->
+        <div style="margin-top:12px">
+          <div class="form-section-label" style="font-size:10px;margin-bottom:6px">追加済み大会</div>
+          <div id="customTournamentList"></div>
+        </div>
+      </div>
+
+      <!-- URLs Section -->
+      <div class="side-section" id="tab-urls">
+        <p style="font-size:10px;color:var(--text3);margin-bottom:10px">テニスベア・JOP 大会URL一覧（目視確認用）</p>
+        <div id="urlList"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ===== DATA =====
+const GRADE_COLOR = {
+  G1:'#ff3b3b', G2:'#ff7043', G3A:'#ffb300', G3B:'#ffd54f',
+  G4A:'#66bb6a', G4B:'#4db6ac', G4C:'#42a5f5', G4D:'#7e8da8',
+  ITF:'#ce93d8', '学連':'#80cbc4'
+};
+
+function d(m,day,yr=2026){return new Date(yr,m-1,day);}
+
+// tournaments: [name, grade, startM, startD, endM, endD, ageStr, genderStr, sdStr, url]
+// ageStr: "12,14" or "12,14,16,18" etc.
+// genderStr: "男,女"
+// sdStr: "S" or "D" or "S,D"
+const RAW = [
+["神奈川県ジュニアテニス選手権（※）","G3A",2,11,3,29,"12,14,16,18","男,女","S,D","http://www.kanagawa-tennis.jp/junior_kanagawajr.html"],
+["東京都ジュニアテニス選手権（※）","G3A",2,15,4,1,"12,14,16,18","男,女","S,D","http://www.tokyo-tennis.jp"],
+["群馬県ジュニアテニス選手権（※）","G3B",2,21,3,1,"12,14,16,18","男,女","S,D","https://www.g-tennis.jp"],
+["千葉県ジュニアテニス選手権（※）","G3A",2,22,4,2,"12,14,16,18","男,女","S,D","http://www.cta-jc.com/"],
+["栃木県ジュニアテニス選手権（※）","G3B",2,27,3,27,"12,14,16,18","男,女","S,D","http://www.tochigi-tennis.com"],
+["埼玉県ジュニアテニス選手権兼関東ジュニア予選（※）","G3A",2,28,4,2,"12,14,16,18","男,女","S,D","https://sta-tennis.org/"],
+["茨城県ジュニアテニス選手権（※）","G3B",3,1,3,31,"12,14,16,18","男,女","S,D","https://ibta-tennis.jp/"],
+["山梨県ジュニアテニス選手権（※）","G3B",3,7,3,26,"12,14,16,18","男,女","S,D","http://ytajr.estclub.co.jp/"],
+["グリーンテニスプラザジュニアOP春「18・14」","G4B",2,23,4,2,"14,18","男,女","S,D","http://info906535.wixsite.com/greentennisplaza"],
+["むさしの村チェリーテニストーナメント","G4C",3,15,4,5,"12,14,16,18","男,女","S,D","https://mltc.jp"],
+["京王スプリングテニストーナメント","G4C",3,25,4,2,"14,16,18","男,女","S","https://www.keio-tc.com/"],
+["春のジュニアコンペティション","G4C",3,25,4,3,"12,14,16,18","男,女","S","https://m-tour-finals.jimdofree.com/"],
+["千葉県小学生テニス選手権","G3A",3,27,3,30,"12","男,女","S","http://www.cta-jc.com/"],
+["群馬県小学生テニス選手権","G3B",3,28,4,5,"12","男,女","S","https://www.g-tennis.jp"],
+["シルクカップジュニアテニストーナメント","G4B",3,28,4,6,"12,14,16,18","男,女","S,D","http://www.tokyo-jttc.com"],
+["フェニックス大磯ジュニアトーナメント春休み","G4C",3,28,4,12,"12,14,16,18","男,女","S,D","http://www.phoenixsports.co.jp"],
+["ALWAYSジュニアテニストーナメント春 U12U14U16","G4C",3,29,4,4,"12,14,16","男,女","S","https://www.always-tennis.com"],
+["小田急藤沢ジュニアトーナメント spring","G4C",3,30,4,4,"12,14,16,18","男,女","S","https://www.odakyu-ts.com/"],
+["ホーネッツ八王子アイビースタージュニアスプリング","G4C",3,30,4,2,"12,14,16,18","男,女","S","http://www.ivy-tennis-club.com"],
+["DUNLOP全国選抜ジュニア選手権関東予選","G2",4,2,4,5,"12,14","男,女","S","https://www.kanto-tennis.com/index.htm"],
+["ありのみカップシングルス・春","G4C",4,2,5,5,"12,14,16,18","男,女","S","https://allthumbs.co.jp"],
+["埼玉県小学生テニス選手権","G3A",4,6,4,18,"12","男,女","S","https://sta-tennis.org/"],
+["東京都小学生テニス選手権","G3A",4,11,4,19,"12","男,女","S","http://www.tokyo-tennis.jp"],
+["神奈川県小学生テニス選手権","G3A",4,11,4,29,"12","男,女","S","http://www.kanagawa-tennis.jp/junior_shogakusei.html"],
+["サムライカップU14 4月大会","G4C",4,4,4,25,"14","男,女","S","https://www.samurai-tennis.com/"],
+["第28回ヨネックスカップTTCアーリーサマージュニア","G4B",4,11,4,29,"12,14","男,女","S","https://www.tennisbear.net/jr-tour/9472"],
+["U16MUFG全国ジュニアテニストーナメント","G1",4,14,4,18,"16","男,女","S","https://jta-tennis.or.jp/tournaments/tabid/123/Default.aspx"],
+["グリーンテニスプラザジュニアOP春「16・12」","G4B",4,5,5,12,"12,16","男,女","S,D","https://www.tennisbear.net/jr-tour/9373"],
+["月見野スプリング2026","G4C",4,6,4,19,"12,14,16,18","男,女","S,D","https://www.tennisbear.net/jr-tour/9835"],
+["HYSオープンジュニア4月","G4D",4,19,5,6,"12,14","男,女","S","https://hys-tennis.com/"],
+["ヨネックスチャレンジカップRSCジュニア春U12,U16","G4C",4,19,5,8,"12,16","男,女","S,D","https://www.tennisbear.net/jr-tour/9439"],
+["STC DUNLOP CUP 4月大会","G4C",4,25,4,29,"12,14,16,18","男,女","S","https://smile-tennis-college.com/index.html"],
+["秩父オープンジュニアスプリング","G4B",4,25,5,2,"12,14,16,18","男,女","S","http://www.spojin.com/"],
+["第17回SEEDジュニアカップ2026","G4C",4,25,5,9,"12,14,16,18","男,女","S","https://www.tennisbear.net/jr-tour/9406"],
+["高崎オープンジュニアspring2026","G4B",4,18,5,31,"12,14,16,18","男,女","S,D","https://www.tennisbear.net/jr-tour/10033"],
+["ジュンレオスプリングジュニアトーナメント2026","G4C",4,25,5,31,"12,14,16,18","男,女","S","https://www.tennisbear.net/jr-tour/9934"],
+["神奈川県高等学校テニス大会兼関東ジュニア予選（※）","G3A",4,26,5,6,"16,18","男,女","S,D","http://www.k-tennis.net/"],
+["第14回桜田アーリーサマージュニアテニストーナメント","G4C",4,29,5,10,"12,14","男,女","S","https://www.tennisbear.net/jr-tour/9868"],
+["ALWAYSジュニアテニストーナメント初夏 U14U16U18","G4C",5,2,5,5,"14,16,18","男,女","S","https://www.always-tennis.com"],
+["DAIKYO佐野ジュニアテニストーナメント","G4C",5,2,5,17,"12,14,16,18","男,女","S","sanoshi-tennis.sakura.ne.jp"],
+["ヨネックスチャレンジカップRSCジュニア春U14,U18","G4C",5,4,5,21,"14,18","男,女","S,D","https://school.tennis365.net/royalsc/"],
+["DUNLOP JR TOUR MTCカップ U14 5月大会","G4C",5,9,5,17,"14","男,女","S,D","http://ajisaimtc.com/mtccup/"],
+["STC DUNLOP CUP 5月大会","G4C",5,9,5,31,"12,14,16,18","男,女","S","https://smile-tennis-college.com/index.html"],
+["フェニックス大磯ジュニアトーナメント夏","G4C",5,10,6,20,"12,14,16,18","男,女","S,D","http://www.phoenixsports.co.jp"],
+["DUNLOP全国選抜ジュニア選手権","G1",5,14,5,17,"12,14","男,女","S","https://jta-tennis.or.jp/tournaments/tabid/123/Default.aspx"],
+["埼玉荒川ジュニアテニストーナメント初夏","G4C",5,16,5,24,"12,14,16,18","男,女","S","https://www.jop-tennis.com/J"],
+["グリーンカップ埼玉オープンサマージュニア「18・14」","G4B",5,16,6,21,"14,18","男,女","S,D","http://info906535.wixsite.com/greentennisplaza"],
+["全国小学生関東予選大会","G2",5,22,5,24,"12","男,女","S","https://www.kanto-tennis.com/index.htm"],
+["ATF Juniors in Japan U14-week1","G4B",5,24,5,30,"14","男,女","S,D","https://www.jop-tennis.com/J"],
+["MtFji 山中湖ジュニアテニストーナメント","G4C",5,30,6,6,"12,14","男,女","S","http://ytajr.estclub.co.jp/"],
+["ATF Juniors in Japan U14-week2","G4B",5,31,6,6,"14","男,女","S,D","https://www.jop-tennis.com/J"],
+["DUNLOP JR TOUR MTCカップ U16 6月大会","G4C",5,31,6,14,"16","男,女","S,D","http://ajisaimtc.com/mtccup/"],
+["TTA CUP ダブルス選手権","G3B",6,6,6,14,"12,14,16,18","男,女","D","http://www.tochigi-tennis.com"],
+["MAT高崎オープンⅠ","G4C",6,6,6,28,"12,14,16,18","男,女","S","https://takasaki.mat-grp.com/index.php"],
+["ATF Juniors in Japan U14-week3","G4B",6,7,6,13,"14","男,女","S,D","http://ytajr.estclub.co.jp/"],
+["関東高等学校テニス大会兼関東高等学校テニス選手権","G2",6,13,6,15,"16,18","男,女","S,D","https://yamanashi-koutairen.jp/tennis/"],
+["STC DUNLOP CUP 6月大会","G4C",6,13,6,20,"12,14,16,18","男,女","S","https://smile-tennis-college.com/index.html"],
+["サムライカップU16 6月大会","G4C",6,13,6,27,"16","男,女","S","https://www.samurai-tennis.com/"],
+["ATF Juniors in Japan U16-week1","G4B",6,14,6,20,"16","男,女","S,D","http://ytajr.estclub.co.jp/"],
+["ATF Juniors in Japan U16-week2","G4B",6,21,6,27,"16","男,女","S,D","http://ytajr.estclub.co.jp/"],
+["ありのみカップダブルス・HEAT","G4C",6,27,7,5,"14,18","男,女","D","https://allthumbs.co.jp"],
+["グリーンカップ埼玉オープンサマージュニア「16・12」","G4B",6,27,7,25,"12,16","男,女","S,D","http://info906535.wixsite.com/greentennisplaza"],
+["ATF Juniors in Japan U16-week3","G4B",6,28,7,4,"16","男,女","S,D","http://ytajr.estclub.co.jp/"],
+["ニューみなみカップジュニアテニストーナメント6月","G4C",6,28,7,5,"12,14,16,18","男,女","S","https://www.spojin.com"],
+["DUNLOP JR TOUR MTCカップ U14 7月大会","G4C",7,4,7,12,"14","男,女","S,D","http://ajisaimtc.com/mtccup/"],
+["埼玉荒川ジュニアテニストーナメント夏","G4C",7,4,7,12,"12,14,16,18","男,女","S","https://www.jop-tennis.com/J"],
+["ITF Juniors in Japan U18","G4B",7,6,7,12,"18","男,女","S,D","http://ytajr.estclub.co.jp/"],
+["SENKO CUP 山梨北杜ジュニアテニストーナメント夏","G4C",7,11,7,19,"12,14,16,18","男,女","S,D","https://www.jop-tennis.com/J"],
+["苺カップジュニアテニストーナメント","G4C",7,11,7,20,"12,14,16,18","男,女","S,D","https://www.abctennis.jp/cup/"],
+["関東ジュニア選手権大会","G2",7,17,7,24,"12,14,16,18","男,女","S,D","https://www.kanto-tennis.com/index.htm"],
+["東京ジュニアサーキットシリーズⅠ","G4B",7,20,7,26,"12,14,16,18","男,女","S","https://www.cosmo-tc.com/tokyojr/"],
+["prince関東ジュニアツアー桜田大会14歳以下","G4B",7,20,7,26,"14","男,女","S,D","http://sakurada-club.com/"],
+["prince関東ジュニアツアー荏原SSC12歳以下","G4B",7,20,7,26,"12","男,女","S,D","https://www.ebarassc.co.jp"],
+["prince関東ジュニアツアーTTC大会16歳以下","G4B",7,20,7,26,"16","男,女","S,D","https://tennis-ttc.or.jp/"],
+["京王サントリーサマーテニストーナメント","G4B",7,20,8,7,"12,14,16,18","男,女","S","https://www.keio-tc.com/"],
+["横浜サマージュニアテニストーナメント","G4C",7,22,7,23,"12,14,16,18","男,女","S",""],
+["埼玉オープン夏季ジュニアトーナメント","G4B",7,22,7,31,"12,14,16,18","男,女","S,D","https://sta-tennis.org/"],
+["前橋南ロータリー杯","G4C",7,24,8,7,"12,14,16,18","男,女","S,D","http://akagi-tennis-club.com"],
+["那須塩原みるひぃカップジュニアテニストーナメント","G4C",7,25,7,27,"12,14,16,18","男,女","S","https://www.jspi.org/"],
+["シルクカップサマージュニアテニストーナメント","G4B",7,29,8,8,"12,14,16,18","男,女","S,D","http://www.tokyo-jttc.com"],
+["U18・U16 小瀬ジュニアテニストーナメント","G4B",7,28,7,30,"16,18","男,女","S","http://ytajr.estclub.co.jp/"],
+["KATA杯U15/U13関東ジュニアトーナメント","G2",8,3,8,11,"12,14","男,女","S","https://www.kanto-tennis.com/index.htm"],
+["むさしの村ジュニアテニストーナメントNATSU","G4B",8,3,8,12,"12,14,16,18","男,女","S","https://mltc.jp"],
+["毎日テニス選手権 supported by テニスユニバース","G4A",8,3,8,22,"12,14,16,18","男,女","S,D","http://www.maitospo.com/"],
+["STC DUNLOP CUP 8月大会","G4B",8,3,8,7,"16,18","男,女","S","https://smile-tennis-college.com/index.html"],
+["全国高等学校テニス選手権大会","G1",8,2,8,8,"16,18","男,女","S,D",""],
+["東京ジュニアサーキットシリーズⅡ","G4B",7,27,8,2,"12,14,16,18","男,女","S","https://www.cosmo-tc.com/tokyojr/"],
+["東京ジュニアサーキットシリーズⅢ","G4B",8,3,8,9,"12,14,16,18","男,女","S","https://www.cosmo-tc.com/tokyojr/"],
+["千葉ジュニアサマーテニストーナメント","G4B",8,1,8,14,"12,14,16,18","男,女","S,D","http://www.cta-jc.com/"],
+["とちぎオープンジュニアテニストーナメント","G4B",8,23,9,19,"12,14,16,18","男,女","S","http://www.tochigi-tennis.com"],
+["全日本ジュニアテニス選手権","G1",8,24,9,5,"12,14,16,18","男,女","S,D","https://jta-tennis.or.jp/tournaments/tabid/123/Default.aspx"],
+["RSK全国選抜ジュニア関東予選大会","G2",9,5,9,7,"12","男,女","S","https://www.kanto-tennis.com/index.htm"],
+["秩父オープンジュニアサマー","G4B",9,5,9,12,"12,14,16,18","男,女","S","http://www.spojin.com/"],
+["ITF 埼玉国際ジュニアテニス J100","G4A",9,7,9,13,"18","男,女","S,D","http://info906535.wixsite.com/greentennisplaza"],
+["U-15全国選抜ジュニア(中牟田杯)関東予選","G2",9,12,9,14,"12,14","男,女","S","https://www.kanto-tennis.com/index.htm"],
+["Yokohama Bowl","G4C",9,12,9,27,"12,14,16,18","男,女","S","https://iracotc-izumi.com/convention-information/yokohama-bowl/"],
+["ジャパンオープンジュニアテニス選手権","ITF",9,13,9,20,"18","男,女","S,D","https://jta-tennis.or.jp/tournaments/tabid/123/Default.aspx"],
+["世界スーパージュニアテニス選手権（※）","ITF",9,21,9,27,"18","男,女","S,D","http://kansaita.jp/"],
+["STC DUNLOP CUP 9月大会","G4C",9,19,9,21,"12,14,16,18","男,女","S","https://smile-tennis-college.com/index.html"],
+["サムライカップU16 9月大会","G4C",9,5,9,26,"16","男,女","S","https://www.samurai-tennis.com/"],
+["RSK全国選抜ジュニアテニス大会","G1",10,16,10,18,"12","男,女","S","https://jta-tennis.or.jp/tournaments/tabid/123/Default.aspx"],
+["U15全国選抜ジュニアテニス選手権(中牟田杯)","G1",10,20,10,25,"12,14","男,女","S,D","https://jta-tennis.or.jp/tournaments/tabid/123/Default.aspx"],
+["STC DUNLOP CUP 10月大会","G4C",10,10,10,12,"12,14,16,18","男,女","S","https://smile-tennis-college.com/index.html"],
+["ヨネックスチャレンジカップRSC秋「U14,U18」","G4C",10,31,11,19,"14,18","男,女","S,D","https://school.tennis365.net/royalsc/"],
+["サムライカップU14 10月大会","G4C",10,3,10,24,"14","男,女","S","https://www.samurai-tennis.com/"],
+["ありのみカップシングルス・秋","G4C",10,3,11,7,"12,14,16,18","男,女","S","https://allthumbs.co.jp"],
+["群馬県ジュニアテニストーナメント","G3B",10,25,11,1,"12,14,16,18","男,女","S,D","https://www.g-tennis.jp"],
+["ITF World Tennis Tour Juniors J30 Chigasaki","G4B",10,26,11,1,"18","男,女","S,D","https://palm-sportsclub.com"],
+["ヨネックスカップTTCオータムジュニアテニストーナメント","G4B",10,17,11,8,"12,14","男,女","S","https://tennis-ttc.or.jp/"],
+["About Cup Junior Tournament Under 16,12","G4B",10,12,11,29,"12,16","男,女","S,D","http://info906535.wixsite.com/greentennisplaza"],
+["KATA杯U18関東ジュニアトーナメント","G2",11,28,11,30,"18","男,女","S","https://www.kanto-tennis.com/index.htm"],
+["千葉県U-18ジュニアチャンピオンシップス","G3A",11,14,11,23,"18","男,女","S","http://www.cta-jc.com/"],
+["ぐんまオープンジュニアトーナメント","G4A",11,14,12,12,"12,14,16,18","男,女","S","https://www.g-tennis.jp"],
+["全日本ジュニア選抜室内テニス選手権","G1",11,19,11,22,"18","男,女","S","https://jta-tennis.or.jp/tournaments/tabid/123/Default.aspx"],
+["ATF Autumn Juniors in Japan U14-week1","G4B",11,21,11,27,"14","男,女","S,D","https://www.jop-tennis.com/J"],
+["ダンロップ神奈川オープンジュニアテニストーナメント","G4A",11,21,12,31,"12,14,16,18","男,女","S,D","http://www.kanagawa-tennis.jp/junior_kanagawaopenjr.html"],
+["ATF Autumn Junior in Japan U14-week2","G4B",11,28,12,4,"14","男,女","S,D","https://www.jop-tennis.com/J"],
+["山梨ウィンタージュニアトーナメント","G4B",11,28,12,13,"12,14,16,18","男,女","S","http://ytajr.estclub.co.jp/"],
+["STC DUNLOP CUP 11月大会","G4C",11,14,11,21,"12,14,16,18","男,女","S","https://smile-tennis-college.com/index.html"],
+["東京都冬季ジュニアテニス選手権","G3A",12,5,12,13,"18","男,女","S","http://www.tokyo-tennis.jp"],
+["京王ウィンターテニストーナメント","G4A",12,5,12,31,"12,14,16,18","男,女","S,D","https://www.keio-tc.com/"],
+["ピーナッツカップ柏ジュニアテニス選手権","G4A",12,25,12,31,"12,14,16,18","男,女","S,D","https://tennis-ttc.or.jp/"],
+["高崎オープンジュニアwinter","G4B",12,27,12,31,"12,14,16,18","男,女","S","https://takasaki.mat-grp.com/index.php"],
+["STC DUNLOP CUP 12月大会","G4C",12,19,12,25,"12,14,16,18","男,女","S","https://smile-tennis-college.com/index.html"],
+["ジュンレオオータムジュニアトーナメント","G4C",9,5,9,27,"12,14,16,18","男,女","S","https://www.junleo-ta.jp/"],
+["ジュンレオノーベンバージュニアトーナメント","G4C",11,1,11,29,"12,14,16,18","男,女","S","https://www.junleo-ta.jp/"],
+["サムライカップU12 5月大会","G4C",5,9,5,23,"12","男,女","S","https://www.samurai-tennis.com/"],
+["サムライカップU16 6月大会","G4C",6,13,6,27,"16","男,女","S","https://www.samurai-tennis.com/"],
+["HYSオープンジュニア5月","G4D",5,16,5,31,"12,14","男,女","S","https://hys-tennis.com/"],
+["HYSオープンジュニア6月","G4D",6,7,6,27,"12,14","男,女","S","https://hys-tennis.com/"],
+["HYSオープンジュニア7月","G4D",7,12,7,24,"12,14","男,女","S","https://hys-tennis.com/"],
+["HYSオープンジュニア8月","G4D",8,23,9,5,"12,14","男,女","S","https://hys-tennis.com/"],
+["HYSオープンジュニア9月","G4D",9,6,9,23,"12,14","男,女","S","https://hys-tennis.com/"],
+["HYSオープンジュニア10月","G4D",10,25,11,8,"12,14","男,女","S","https://hys-tennis.com/"],
+["HYSオープンジュニア11月","G4D",11,15,11,29,"12,14","男,女","S","https://hys-tennis.com/"],
+["HYSオープンジュニア12月","G4D",12,6,12,24,"12,14","男,女","S","https://hys-tennis.com/"],
+["相模原グリーンジュニアテニス大会4月大会","G4C",4,4,4,12,"12,14","男,女","S","https://www.tennisbear.net/jr-tour/9010"],
+["第10回むさしの村ジュニアテニストーナメント5月","G4C",4,29,5,10,"14,16","男,女","S","https://www.tennisbear.net/jr-tour/9901"],
+
+];
+
+const tournaments = RAW.map((r,i) => ({
+  id: i,
+  name: r[0], grade: r[1],
+  start: d(r[2],r[3]), end: d(r[4],r[5]),
+  ages: r[6].split(',').map(Number),
+  genders: r[7].split(','),
+  sds: r[8].split(','),
+  url: r[9],
+  deadline: null,
+  yosenStart: null, yosenEnd: null, yosenDates: [],
+  honsenStart: null, honsenEnd: null, honsenDates: [],
+  yobi: null, memo: '', customUrl: '', entered: false
+}));
+
+// Load saved data
+function loadSaved() {
+  try {
+    const s = localStorage.getItem('jt2026');
+    if (s) {
+      const saved = JSON.parse(s);
+      saved.forEach(sv => {
+        const t = tournaments.find(x => x.id === sv.id);
+        if (t) {
+          ['deadline','yosenStart','yosenEnd','honsenStart','honsenEnd','yobi'].forEach(k => {
+            t[k] = sv[k] ? new Date(sv[k]) : null;
+          });
+          t.yosenDates = sv.yosenDates || [];
+          t.honsenDates = sv.honsenDates || [];
+          t.memo = sv.memo || '';
+          t.customUrl = sv.customUrl || '';
+          t.entered = sv.entered || false;
+        }
+      });
+    }
+  } catch(e) {}
+}
+
+function saveToDB() {
+  const data = tournaments.map(t => ({
+    id: t.id,
+    deadline: t.deadline ? t.deadline.toISOString() : null,
+    yosenStart: t.yosenStart ? t.yosenStart.toISOString() : null,
+    yosenEnd: t.yosenEnd ? t.yosenEnd.toISOString() : null,
+    yosenDates: t.yosenDates || [],
+    honsenStart: t.honsenStart ? t.honsenStart.toISOString() : null,
+    honsenEnd: t.honsenEnd ? t.honsenEnd.toISOString() : null,
+    honsenDates: t.honsenDates || [],
+    yobi: t.yobi ? t.yobi.toISOString() : null,
+    memo: t.memo, customUrl: t.customUrl,
+    entered: t.entered || false
+  }));
+  try { localStorage.setItem('jt2026', JSON.stringify(data)); } catch(e) {}
+}
+
+// ===== STATE =====
+let selectedAges = [];
+let selectedGender = null;
+let selectedSDs = [];
+let selectedGrades = [];
+let selectedMonth = 0;
+let showExpired = true;
+let warnMode = true; // ダブルエントリー警告ON/OFF
+
+// 入力モード管理
+const inputMode = { yosen: 'range', honsen: 'range' };
+// 飛び飛び日付リスト
+const pickedDates = { yosen: [], honsen: [] };
+const DAY_W = 3.2;
+const Y_START = new Date(2026,1,1);
+const Y_END   = new Date(2027,0,1);
+const TOTAL_DAYS = (Y_END - Y_START) / 86400000;
+
+const MONTHS_DEF = [];
+for(let m=2;m<=12;m++){
+  const ms = new Date(2026,m-1,1);
+  const me = new Date(2026,m,0);
+  MONTHS_DEF.push({m, label:`${m}月`, start:ms, end:me, days: (me-ms)/86400000+1});
+}
+
+function dayOffset(dt){return Math.max(0,(dt-Y_START)/86400000);}
+
+// ===== FILTER =====
+function toggleAge(btn){
+  const age = +btn.dataset.age.replace('U','');
+  if(selectedAges.includes(age)){
+    selectedAges = selectedAges.filter(a=>a!==age);
+    btn.className='filter-btn';
+  } else {
+    if(selectedAges.length>=2) return;
+    selectedAges.push(age);
+    btn.className='filter-btn ' + (selectedAges.indexOf(age)===0?'age-active-1':'age-active-2');
+  }
+  renderGantt();
+}
+function toggleSingle(btn, type){
+  const val = btn.dataset[type];
+  if(type==='gender'){
+    if(selectedGender===val){selectedGender=null; btn.classList.remove('active');}
+    else {
+      document.querySelectorAll('[data-gender]').forEach(b=>b.classList.remove('active'));
+      selectedGender=val; btn.classList.add('active');
+    }
+  }
+  renderGantt();
+}
+function toggleMulti(btn, type){
+  const val = btn.dataset[type];
+  if(type==='sd'){
+    if(selectedSDs.includes(val)){selectedSDs=selectedSDs.filter(s=>s!==val);btn.classList.remove('active');}
+    else{selectedSDs.push(val);btn.classList.add('active');}
+  }
+  renderGantt();
+}
+function toggleGrade(btn){
+  const g = btn.dataset.grade;
+  const color = GRADE_COLOR[g];
+  if(selectedGrades.includes(g)){
+    selectedGrades=selectedGrades.filter(x=>x!==g);
+    btn.classList.remove('active');
+    btn.style.color=color;
+    btn.style.background='transparent';
+    btn.style.borderColor='var(--border)';
+  } else {
+    selectedGrades.push(g);
+    btn.classList.add('active');
+    btn.style.background=color;
+    btn.style.color='#000';
+    btn.style.borderColor=color;
+  }
+  renderGantt();
+}
+function toggleWarnMode(){
+  warnMode = !warnMode;
+  const btn = document.getElementById('warnToggleBtn');
+  btn.textContent = warnMode ? '⚠ ダブルエントリー警告 ON' : '⚠ ダブルエントリー警告 OFF';
+  btn.classList.toggle('off', !warnMode);
+  updateConflicts();
+}
+
+function setMode(type, mode){
+  inputMode[type] = mode;
+  // toggle range/pick UI
+  document.getElementById(type+'-range-input').style.display = mode==='range' ? '' : 'none';
+  document.getElementById(type+'-pick-input').style.display = mode==='pick' ? '' : 'none';
+  document.getElementById(type+'-mode-range').classList.toggle('active', mode==='range');
+  document.getElementById(type+'-mode-pick').classList.toggle('active', mode==='pick');
+  if(mode==='pick') renderPickedDates(type);
+}
+
+function addDatePick(type){
+  pickedDates[type].push('');
+  renderPickedDates(type);
+}
+
+function removeDatePick(type, idx){
+  pickedDates[type].splice(idx, 1);
+  renderPickedDates(type);
+}
+
+function renderPickedDates(type){
+  const container = document.getElementById(type+'-dates-container');
+  const color = type==='yosen' ? 'var(--yosen)' : 'var(--honsen)';
+  container.innerHTML = pickedDates[type].map((v, i) =>
+    '<div class="date-pick-row">' +
+    '<input class="form-input" type="date" value="'+v+'" oninput="updatePickedDate(\''+type+'\','+i+',this.value)" style="border-left:2px solid '+color+'">' +
+    '<button class="remove-date-btn" onclick="removeDatePick(\''+type+'\','+i+')">×</button>' +
+    '</div>'
+  ).join('');
+}
+
+function updatePickedDate(type, idx, val){
+  pickedDates[type][idx] = val;
+}
+
+// 本戦の日付セットを返す（判定用）
+function getHonsenDates(t){
+  const dates = new Set();
+  if(t.honsenDates && t.honsenDates.length > 0){
+    // 飛び飛びモード
+    t.honsenDates.forEach(d => { if(d) dates.add(d); });
+  } else if(t.honsenStart && t.honsenEnd){
+    // 範囲モード
+    let cur = new Date(t.honsenStart);
+    const end = new Date(t.honsenEnd);
+    while(cur <= end){
+      dates.add(cur.toISOString().slice(0,10));
+      cur.setDate(cur.getDate()+1);
+    }
+  } else if(t.honsenStart){
+    dates.add(t.honsenStart.toISOString().slice(0,10));
+  }
+  return dates;
+}
+
+function toggleExpired(){
+  showExpired = !showExpired;
+  const btn = document.getElementById('toggleExpiredBtn');
+  btn.classList.toggle('active', !showExpired);
+  btn.textContent = showExpired ? '終了済みを隠す' : '終了済みも表示';
+  renderGantt();
+}
+
+function isExpired(t){
+  const today = new Date(); today.setHours(0,0,0,0);
+  if(t.entered){
+    const lastDay = t.honsenEnd || t.yosenEnd || t.end;
+    if(!lastDay) return false;
+    return lastDay < today;
+  }
+  // deadline未入力の場合はendで判断、endもなければ非表示にしない
+  const expireDate = t.deadline || t.end;
+  if(!expireDate) return false;
+  return expireDate < today;
+}
+
+function resetFilters(){
+  selectedAges=[]; selectedGender=null; selectedSDs=[]; selectedGrades=[];
+  document.querySelectorAll('.filter-btn').forEach(b=>{
+    b.className='filter-btn'+(b.dataset.grade?' grade-btn':'');
+    if(b.dataset.grade) b.style.color=GRADE_COLOR[b.dataset.grade];
+    else b.style.color='';
+    b.style.background='transparent';
+    b.style.borderColor='var(--border)';
+  });
+  document.getElementById('monthSelect').value='0';
+  selectedMonth=0;
+  renderGantt();
+}
+
+function getFiltered(){
+  selectedMonth = +document.getElementById('monthSelect').value;
+  return tournaments.filter(t=>{
+    if(selectedAges.length>0 && !selectedAges.some(a=>t.ages.includes(a))) return false;
+    if(selectedGender && !t.genders.includes(selectedGender)) return false;
+    if(selectedSDs.length>0 && !selectedSDs.some(s=>t.sds.includes(s))) return false;
+    if(selectedGrades.length>0 && !selectedGrades.includes(t.grade)) return false;
+    if(selectedMonth>0){
+      const sm=t.start.getMonth()+1, em=t.end.getMonth()+1;
+      if(sm>selectedMonth||em<selectedMonth) return false;
+    }
+    if(!showExpired && isExpired(t)) return false;
+    return true;
+  });
+}
+
+// ===== GANTT RENDER =====
+function renderGantt(){
+  const filtered = getFiltered();
+  document.getElementById('countNum').textContent = filtered.length;
+  const container = document.getElementById('ganttContainer');
+  const totalW = TOTAL_DAYS * DAY_W;
+
+  let html = '<div class="gantt-header">';
+  html += '<div class="gantt-check-col" style="font-size:9px;color:var(--text3);padding:4px 0;align-items:flex-end;justify-content:center;height:60px">✓</div>';
+  html += '<div class="gantt-label-col" style="display:flex;align-items:flex-end;padding:4px 8px;font-size:9px;color:var(--text3);height:60px">大会名</div>';
+  html += '<div class="gantt-grade-col" style="display:flex;align-items:flex-end;justify-content:center;padding:4px 2px;font-size:9px;color:var(--text3);height:60px">G</div>';
+  html += '<div class="gantt-timeline">';
+
+  // Month headers
+  html += `<div class="month-headers">`;
+  MONTHS_DEF.forEach(mo=>{
+    const w = mo.days * DAY_W;
+    const colors = ['#1a2540','#1e2940','#1a3040','#1e3540','#1a2d3a','#1e2840','#1a2030','#1e2a40','#1a2840','#1e3040','#1a2540'];
+    const idx = mo.m-2;
+    html += `<div class="month-cell" style="width:${w}px;min-width:${w}px;background:${colors[idx]||'#1a2540'}">${mo.label}</div>`;
+  });
+  html += `</div>`;
+
+  // Day headers
+  html += `<div class="day-headers">`;
+  MONTHS_DEF.forEach(mo=>{
+    for(let day=1;day<=mo.days;day++){
+      const w = DAY_W;
+      const dt = new Date(2026,mo.m-1,day);
+      const dow = dt.getDay();
+      let color = 'var(--text3)';
+      if(dow===0) color='#ff5252';
+      else if(dow===6) color='#64b5f6';
+      html += `<div class="day-cell" style="width:${w}px;min-width:${w}px;color:${color}">${day===1||day===5||day===10||day===15||day===20||day===25?day:''}</div>`;
+    }
+  });
+  html += `</div>`;
+  html += `</div></div>`;
+
+  // Body
+  html += `<div class="gantt-body">`;
+
+  // 日付順ソート
+  filtered.sort((a,b)=>a.start-b.start);
+
+  filtered.forEach(t=>{
+    const color = GRADE_COLOR[t.grade]||'#7e8da8';
+    const s = dayOffset(t.start);
+    const e = dayOffset(t.end) + 1;
+    const barLeft = s * DAY_W;
+    const barW = Math.max(3,(e-s)*DAY_W);
+    const expired = isExpired(t);
+    const enteredCls = t.entered ? ' is-entered' : '';
+    const expiredCls = expired ? ' is-expired-row' : '';
+    const enteredBadge = t.entered ? '<span class="entered-badge">エントリー済</span>' : '';
+    const checkedAttr = t.entered ? 'checked' : '';
+    const barGlow = t.entered ? ';box-shadow:0 0 6px '+color+';outline:1px solid #4caf50;' : '';
+
+    // ===== 締切マーカー =====
+    let dlMarker = '';
+    if(t.deadline){
+      const pos = dayOffset(t.deadline)*DAY_W;
+      if(pos>=0&&pos<=totalW){
+        dlMarker = '<div style="position:absolute;left:'+pos+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--deadline);border-radius:50%;z-index:4;margin-left:-4px" title="締切"></div>';
+        dlMarker += '<div style="position:absolute;left:'+pos+'px;top:0;bottom:0;width:1px;background:var(--deadline);opacity:0.5;z-index:3"></div>';
+      }
+    }
+
+    // ===== 予選バー（範囲 or 飛び飛びドット）=====
+    let yosenBar = '';
+    if(t.yosenDates && t.yosenDates.length > 0){
+      // 飛び飛びモード → ドット
+      t.yosenDates.forEach(dateStr=>{
+        if(!dateStr) return;
+        const pos = dayOffset(new Date(dateStr))*DAY_W;
+        if(pos>=0&&pos<=totalW){
+          yosenBar += '<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--yosen);border-radius:50%;z-index:3"></div>';
+        }
+      });
+    } else if(t.yosenStart && t.yosenEnd){
+      const ys=dayOffset(t.yosenStart)*DAY_W, ye=(dayOffset(t.yosenEnd)+1)*DAY_W;
+      yosenBar='<div style="position:absolute;left:'+ys+'px;width:'+(ye-ys)+'px;height:100%;background:var(--yosen);opacity:0.85;border-radius:2px;z-index:2"></div>';
+    } else if(t.yosenStart){
+      const pos=dayOffset(t.yosenStart)*DAY_W;
+      yosenBar='<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--yosen);border-radius:50%;z-index:3"></div>';
+    }
+
+    // ===== 本戦バー（範囲 or 飛び飛びドット）=====
+    let honsenBar = '';
+    if(t.honsenDates && t.honsenDates.length > 0){
+      // 飛び飛びモード → ドット
+      t.honsenDates.forEach(dateStr=>{
+        if(!dateStr) return;
+        const pos = dayOffset(new Date(dateStr))*DAY_W;
+        if(pos>=0&&pos<=totalW){
+          honsenBar += '<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--honsen);border-radius:50%;z-index:3"></div>';
+        }
+      });
+    } else if(t.honsenStart && t.honsenEnd){
+      const hs=dayOffset(t.honsenStart)*DAY_W, he=(dayOffset(t.honsenEnd)+1)*DAY_W;
+      honsenBar='<div style="position:absolute;left:'+hs+'px;width:'+(he-hs)+'px;height:100%;background:var(--honsen);opacity:0.85;border-radius:2px;z-index:2"></div>';
+    } else if(t.honsenStart){
+      const pos=dayOffset(t.honsenStart)*DAY_W;
+      honsenBar='<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--honsen);border-radius:50%;z-index:3"></div>';
+    }
+
+    // ===== 予備日ドット =====
+    let yobiDot = '';
+    if(t.yobi){
+      const pos=dayOffset(t.yobi)*DAY_W;
+      if(pos>=0&&pos<=totalW){
+        yobiDot='<div style="position:absolute;left:'+(pos-3)+'px;top:50%;transform:translateY(-50%);width:6px;height:6px;background:var(--yobi);border-radius:50%;z-index:3;opacity:0.8"></div>';
+      }
+    }
+
+    const rowBg = getMonthBands();
+
+    html += '<div class="gantt-row'+enteredCls+expiredCls+'" data-id="'+t.id+'" style="height:60px">';
+
+    // チェックボックス列
+    html += '<div class="gantt-check-col" style="height:60px">';
+    html += '<input type="checkbox" class="entry-check" '+checkedAttr+' onchange="toggleEntryCheck('+t.id+',this)" title="エントリーチェック">';
+    html += '</div>';
+
+    // 大会名列
+    html += '<div class="gantt-row-label" onclick="selectEntry('+t.id+')" title="'+t.name.replace(/"/g,'&quot;')+'" style="height:60px;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:4px 8px;white-space:normal;line-height:1.3">';
+    html += '<div style="font-size:10px;color:var(--text);font-weight:500;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+t.name+enteredBadge+'</div>';
+    html += '</div>';
+
+    // グレード列
+    html += '<div class="gantt-row-grade" style="color:'+color+';height:60px;flex-direction:column;gap:2px">';
+    html += '<span>'+t.grade+'</span>';
+    html += '</div>';
+
+    // タイムライン列 - 3行構造
+    html += '<div class="gantt-row-timeline" style="width:'+totalW+'px;height:60px;display:flex;flex-direction:column">';
+
+    // 行1: 大会期間バー + 締切マーカー（高さ20px）
+    html += '<div style="position:relative;height:20px;flex-shrink:0">';
+    html += rowBg;
+    html += '<div style="position:absolute;left:'+barLeft+'px;width:'+barW+'px;height:10px;top:5px;background:'+color+';border-radius:3px;opacity:0.5'+barGlow+'" onmousemove="showTip(event,'+t.id+')" onmouseleave="hideTip()" style="cursor:pointer"></div>';
+    html += dlMarker;
+    html += '</div>';
+
+    // 行2: 予選バー（高さ20px）
+    html += '<div style="position:relative;height:20px;flex-shrink:0;border-top:1px solid rgba(255,255,255,0.04)">';
+    html += rowBg;
+    if(yosenBar){
+      html += yosenBar;
+    } else {
+      // 予選未入力ならラベル
+      html += '<div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:8px;color:var(--text3)">予選</div>';
+    }
+    html += '</div>';
+
+    // 行3: 本戦バー + 予備日（高さ20px）
+    html += '<div style="position:relative;height:20px;flex-shrink:0;border-top:1px solid rgba(255,255,255,0.04)">';
+    html += rowBg;
+    if(honsenBar){
+      html += honsenBar;
+      html += yobiDot;
+    } else {
+      html += '<div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:8px;color:var(--text3)">本戦</div>';
+    }
+    html += '</div>';
+
+    html += '</div>'; // timeline
+    html += '</div>'; // row
+  });
+
+  html += `</div>`;
+  container.innerHTML = html;
+
+  // today line - inject into each sub-row div
+  const today = new Date();
+  const todayPos = dayOffset(today)*DAY_W;
+  const totalWpx = TOTAL_DAYS*DAY_W;
+  if(todayPos>0&&todayPos<totalWpx){
+    container.querySelectorAll('.gantt-row-timeline > div').forEach(r=>{
+      const tl = document.createElement('div');
+      tl.className='today-line';
+      tl.style.left=todayPos+'px';
+      r.appendChild(tl);
+    });
+  }
+
+  // Auto-scroll to today (left scroll, 100px margin before today)
+  const wrap = document.getElementById('ganttWrap');
+  const scrollTarget = Math.max(0, todayPos - 100);
+  wrap.scrollLeft = scrollTarget;
+
+  updateEntryList();
+  updateConflicts();
+}
+
+function toggleEntryCheck(id, checkbox){
+  const t = tournaments.find(x=>x.id===id);
+  if(!t) return;
+  t.entered = checkbox.checked;
+  saveToDB();
+  renderGantt();
+}
+
+function getMonthBands(){
+  let html='';
+  MONTHS_DEF.forEach((mo,i)=>{
+    const s=dayOffset(mo.start)*DAY_W;
+    const w=mo.days*DAY_W;
+    if(s>0){
+      html+=`<div class="month-sep-line" style="left:${s}px"></div>`;
+    }
+  });
+  return html;
+}
+
+// ===== TOOLTIP =====
+function showTip(e,id){
+  const t = tournaments.find(x=>x.id===id);
+  if(!t) return;
+  const tip = document.getElementById('tooltip');
+  const color = GRADE_COLOR[t.grade]||'#7e8da8';
+  const fmt = dt => dt?`${dt.getMonth()+1}/${dt.getDate()}`:'未入力';
+  const memoRow = t.memo ? '<div class="tooltip-row"><span class="tooltip-key">メモ</span><span class="tooltip-val" style="font-size:10px">'+t.memo+'</span></div>' : '';
+  tip.innerHTML = `
+    <div class="tooltip-name">${t.name}</div>
+    <div class="tooltip-row"><span class="tooltip-key">グレード</span><span class="tooltip-badge" style="background:${color}">${t.grade}</span></div>
+    <div class="tooltip-row"><span class="tooltip-key">期間</span><span class="tooltip-val">${fmt(t.start)} 〜 ${fmt(t.end)}</span></div>
+    <div class="tooltip-row"><span class="tooltip-key">締切日</span><span class="tooltip-val" style="color:${t.deadline?'var(--deadline)':'var(--text3)'}">${fmt(t.deadline)}</span></div>
+    <div class="tooltip-row"><span class="tooltip-key">予選</span><span class="tooltip-val" style="color:${t.yosenStart?'var(--yosen)':'var(--text3)'}">${t.yosenStart?fmt(t.yosenStart)+' 〜 '+fmt(t.yosenEnd):'未入力'}</span></div>
+    <div class="tooltip-row"><span class="tooltip-key">本戦</span><span class="tooltip-val" style="color:${t.honsenStart?'var(--honsen)':'var(--text3)'}">${t.honsenStart?fmt(t.honsenStart)+' 〜 '+fmt(t.honsenEnd):'未入力'}</span></div>
+    <div class="tooltip-row"><span class="tooltip-key">予備日</span><span class="tooltip-val">${fmt(t.yobi)}</span></div>
+    <div class="tooltip-row"><span class="tooltip-key">対象</span><span class="tooltip-val" style="font-size:10px">U${t.ages.join('/U')} / ${t.genders.join('・')} / ${t.sds.join(',')}</span></div>
+    ${memoRow}
+  `;
+  tip.style.display='block';
+  tip.style.left=(e.clientX+14)+'px';
+  tip.style.top=(e.clientY-10)+'px';
+}
+function hideTip(){ document.getElementById('tooltip').style.display='none'; }
+
+// ===== SIDE PANEL =====
+function switchTab(tab){
+  const tabs=['entry','conflict','add','urls'];
+  document.querySelectorAll('.side-tab').forEach((t,i)=>{
+    t.classList.toggle('active',tabs[i]===tab);
+  });
+  document.querySelectorAll('.side-section').forEach(s=>{
+    s.classList.toggle('active',s.id==='tab-'+tab);
+  });
+  if(tab==='conflict') updateConflicts();
+  if(tab==='urls') updateURLs();
+  if(tab==='add') updateCustomTournamentList();
+}
+
+// Entry list
+let currentEntryId = null;
+function updateEntryList(){
+  const q = document.getElementById('entrySearch').value.toLowerCase();
+  const list = document.getElementById('entryList');
+  const filtered = tournaments.filter(t=>t.name.toLowerCase().includes(q)).slice(0,60);
+  list.innerHTML = filtered.map(t=>{
+    const color=GRADE_COLOR[t.grade]||'#7e8da8';
+    const hasDL = t.deadline||t.yosenStart||t.honsenStart;
+    const enteredStyle = t.entered ? 'border-color:#4caf50;background:rgba(76,175,80,0.08)' : '';
+    return `<div class="entry-item${currentEntryId===t.id?' selected':''}" onclick="selectEntry(${t.id})" style="${enteredStyle}">
+      <div style="display:flex;align-items:center;gap:6px">
+        <input type="checkbox" class="entry-check" ${t.entered?'checked':''} onclick="event.stopPropagation()" onchange="toggleEntryCheck(${t.id},this)" style="flex-shrink:0">
+        <div>
+          <div class="entry-item-name">${t.name}${t.entered?'<span style="display:inline-block;background:#4caf50;color:#000;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;margin-left:4px">エントリー済</span>':''}</div>
+          <div class="entry-item-meta">
+            <span style="color:${color};font-weight:700">${t.grade}</span>
+            &nbsp;${t.start.getMonth()+1}/${t.start.getDate()}〜${t.end.getMonth()+1}/${t.end.getDate()}
+            ${hasDL?'&nbsp;<span style="color:#66bb6a;font-size:9px">✓詳細入力済</span>':''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function filterEntryList(){ updateEntryList(); }
+
+function selectEntry(id){
+  currentEntryId = id;
+  const t = tournaments.find(x=>x.id===id);
+  if(!t) return;
+  switchTab('entry');
+  document.getElementById('entryFormTitle').textContent = t.name;
+  const toVal = dt => dt ? dt.toISOString().slice(0,10) : '';
+
+  // 締切・予備日
+  document.getElementById('inp-deadline').value = toVal(t.deadline);
+  document.getElementById('inp-yobi').value = toVal(t.yobi);
+  document.getElementById('inp-memo').value = t.memo||'';
+  document.getElementById('inp-url').value = t.customUrl||t.url||'';
+
+  // 予選モード復元
+  const yosenMode = (t.yosenDates && t.yosenDates.length > 0) ? 'pick' : 'range';
+  pickedDates.yosen = t.yosenDates ? [...t.yosenDates] : [];
+  setMode('yosen', yosenMode);
+  document.getElementById('inp-yosen-start').value = toVal(t.yosenStart);
+  document.getElementById('inp-yosen-end').value = toVal(t.yosenEnd);
+
+  // 本戦モード復元
+  const honsenMode = (t.honsenDates && t.honsenDates.length > 0) ? 'pick' : 'range';
+  pickedDates.honsen = t.honsenDates ? [...t.honsenDates] : [];
+  setMode('honsen', honsenMode);
+  document.getElementById('inp-honsen-start').value = toVal(t.honsenStart);
+  document.getElementById('inp-honsen-end').value = toVal(t.honsenEnd);
+
+  document.getElementById('entryForm').classList.add('visible');
+  document.getElementById('savedBadge').style.display='none';
+  updateEntryList();
+}
+
+function saveEntry(){
+  const t = tournaments.find(x=>x.id===currentEntryId);
+  if(!t) return;
+  const fromVal = v => v ? new Date(v) : null;
+
+  t.deadline = fromVal(document.getElementById('inp-deadline').value);
+  t.yobi = fromVal(document.getElementById('inp-yobi').value);
+  t.memo = document.getElementById('inp-memo').value;
+  t.customUrl = document.getElementById('inp-url').value;
+
+  // 予選
+  if(inputMode.yosen === 'pick'){
+    t.yosenDates = pickedDates.yosen.filter(d=>d);
+    t.yosenStart = t.yosenDates.length > 0 ? fromVal(t.yosenDates[0]) : null;
+    t.yosenEnd = t.yosenDates.length > 0 ? fromVal(t.yosenDates[t.yosenDates.length-1]) : null;
+  } else {
+    t.yosenDates = [];
+    t.yosenStart = fromVal(document.getElementById('inp-yosen-start').value);
+    t.yosenEnd = fromVal(document.getElementById('inp-yosen-end').value);
+  }
+
+  // 本戦
+  if(inputMode.honsen === 'pick'){
+    t.honsenDates = pickedDates.honsen.filter(d=>d);
+    t.honsenStart = t.honsenDates.length > 0 ? fromVal(t.honsenDates[0]) : null;
+    t.honsenEnd = t.honsenDates.length > 0 ? fromVal(t.honsenDates[t.honsenDates.length-1]) : null;
+  } else {
+    t.honsenDates = [];
+    t.honsenStart = fromVal(document.getElementById('inp-honsen-start').value);
+    t.honsenEnd = fromVal(document.getElementById('inp-honsen-end').value);
+  }
+
+  saveToDB();
+  const badge = document.getElementById('savedBadge');
+  badge.style.display='block';
+  setTimeout(()=>badge.style.display='none',2000);
+  renderGantt();
+  updateConflicts();
+}
+
+function updateConflicts(){
+  const div = document.getElementById('conflictList');
+  if(!warnMode){
+    div.innerHTML = '<div class="no-conflict"><div class="icon" style="font-size:20px">⚠</div><div style="margin-top:6px">警告は現在OFFです</div></div>';
+    return;
+  }
+
+  // エントリー済みかつ本戦日が入力されている大会のみ対象
+  const entered = tournaments.filter(t => t.entered && (t.honsenDates && t.honsenDates.length > 0 || t.honsenStart));
+
+  const conflicts = [];
+  for(let i=0; i<entered.length; i++){
+    for(let j=i+1; j<entered.length; j++){
+      const a = entered[i], b = entered[j];
+      const aDates = getHonsenDates(a);
+      const bDates = getHonsenDates(b);
+      // 1日でも重なったらダブルエントリー
+      const overlap = [...aDates].filter(d => bDates.has(d));
+      if(overlap.length > 0){
+        conflicts.push({ a, b, overlap });
+      }
+    }
+  }
+
+  if(conflicts.length === 0){
+    const enteredCount = entered.length;
+    div.innerHTML = enteredCount === 0
+      ? '<div class="no-conflict"><div class="icon">📋</div>エントリー済み大会に<br>本戦日を入力してください</div>'
+      : '<div class="no-conflict"><div class="icon">✓</div>ダブルエントリーなし！<br>（本戦日入力済み: '+enteredCount+'大会）</div>';
+    return;
+  }
+
+  div.innerHTML = conflicts.map(c => {
+    const overlapStr = c.overlap.map(d => {
+      const dt = new Date(d);
+      return (dt.getMonth()+1)+'/'+(dt.getDate());
+    }).join('、');
+    const colorA = GRADE_COLOR[c.a.grade]||'#7e8da8';
+    const colorB = GRADE_COLOR[c.b.grade]||'#7e8da8';
+    return '<div class="de-warning">' +
+      '<div class="de-warning-title">⚠ 本戦日が重複しています</div>' +
+      '<div class="de-warning-names">' +
+      '<span style="color:'+colorA+';font-weight:700">['+c.a.grade+']</span> '+c.a.name+'<br>' +
+      '<span style="color:'+colorB+';font-weight:700">['+c.b.grade+']</span> '+c.b.name +
+      '</div>' +
+      '<div style="margin-top:5px;color:#ff4081;font-size:10px">重複日: '+overlapStr+'</div>' +
+      '</div>';
+  }).join('');
+}
+
+// URLs
+function updateURLs(){
+  const div = document.getElementById('urlList');
+  const withUrl = tournaments.filter(t=>t.url||t.customUrl);
+  div.innerHTML = withUrl.map(t=>{
+    const color=GRADE_COLOR[t.grade]||'#7e8da8';
+    const url=t.customUrl||t.url;
+    return `<div class="url-item">
+      <div class="url-name">${t.name}<span class="url-grade" style="background:${color}">${t.grade}</span></div>
+      <a class="url-link" href="${url}" target="_blank">${url}</a>
+    </div>`;
+  }).join('');
+}
+
+// ===== CUSTOM TOURNAMENT ADD =====
+let customTournaments = []; // 手動追加大会
+
+function loadCustomTournaments(){
+  try {
+    const s = localStorage.getItem('jt2026_custom');
+    if(s) {
+      const parsed = JSON.parse(s);
+      // ISO文字列からDateを復元（タイムゾーンずれを防ぐ）
+      const toDate = v => {
+        if(!v) return null;
+        const d = new Date(v);
+        // ISOStringをローカル日付として解釈し直す
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      };
+      customTournaments = parsed.map(ct => ({
+        ...ct,
+        start: toDate(ct.start),
+        end: toDate(ct.end),
+        deadline: toDate(ct.deadline),
+        yosenStart: toDate(ct.yosenStart),
+        yosenEnd: toDate(ct.yosenEnd),
+        honsenStart: toDate(ct.honsenStart),
+        honsenEnd: toDate(ct.honsenEnd),
+        yobi: toDate(ct.yobi),
+        yosenDates: ct.yosenDates || [],
+        honsenDates: ct.honsenDates || [],
+        isCustom: true
+      }));
+    }
+    // tournamentsに結合
+    customTournaments.forEach(ct => {
+      if(!tournaments.find(t=>t.id===ct.id)){
+        tournaments.push(ct);
+      }
+    });
+  } catch(e){ console.error('loadCustomTournaments error:', e); }
+}
+
+function saveCustomTournaments(){
+  const toSave = customTournaments.map(ct => ({
+    ...ct,
+    start: ct.start ? ct.start.toISOString() : null,
+    end: ct.end ? ct.end.toISOString() : null,
+    deadline: ct.deadline ? ct.deadline.toISOString() : null,
+    yosenStart: ct.yosenStart ? ct.yosenStart.toISOString() : null,
+    yosenEnd: ct.yosenEnd ? ct.yosenEnd.toISOString() : null,
+    honsenStart: ct.honsenStart ? ct.honsenStart.toISOString() : null,
+    honsenEnd: ct.honsenEnd ? ct.honsenEnd.toISOString() : null,
+    yobi: ct.yobi ? ct.yobi.toISOString() : null,
+  }));
+  try { localStorage.setItem('jt2026_custom', JSON.stringify(toSave)); } catch(e){}
+}
+
+function addCustomTournament(){
+  const name = document.getElementById('add-name').value.trim();
+  const startVal = document.getElementById('add-start').value;
+  const endVal = document.getElementById('add-end').value;
+  if(!name || !startVal || !endVal){
+    alert('大会名・開始日・終了日は必須です');
+    return;
+  }
+
+  const ages = [...document.querySelectorAll('.add-age-cb:checked')].map(c=>+c.value);
+  const genders = [...document.querySelectorAll('.add-gender-cb:checked')].map(c=>c.value);
+  const sds = [...document.querySelectorAll('.add-sd-cb:checked')].map(c=>c.value);
+
+  if(ages.length===0){ alert('対象年齢を1つ以上選択してください'); return; }
+
+  const fromVal = v => {
+    if(!v) return null;
+    const [yr,mo,da] = v.split('-').map(Number);
+    return new Date(yr, mo-1, da);
+  };
+  const newId = 10000 + customTournaments.length + Date.now() % 1000;
+
+  const ct = {
+    id: newId,
+    name,
+    grade: document.getElementById('add-grade').value,
+    start: fromVal(startVal),
+    end: fromVal(endVal),
+    ages,
+    genders: genders.length > 0 ? genders : ['男','女'],
+    sds: sds.length > 0 ? sds : ['S'],
+    url: document.getElementById('add-url').value,
+    memo: document.getElementById('add-memo').value,
+    deadline: fromVal(document.getElementById('add-deadline').value),
+    yosenStart: null, yosenEnd: null, yosenDates: [],
+    honsenStart: fromVal(document.getElementById('add-honsen-start').value),
+    honsenEnd: fromVal(document.getElementById('add-honsen-end').value),
+    honsenDates: [],
+    yobi: null, customUrl: '', entered: false,
+    isCustom: true
+  };
+
+  customTournaments.push(ct);
+  tournaments.push(ct);
+  saveCustomTournaments();
+
+  // フォームリセット
+  ['add-name','add-url','add-memo','add-start','add-end','add-deadline','add-honsen-start','add-honsen-end'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  document.querySelectorAll('.add-age-cb,.add-gender-cb,.add-sd-cb').forEach(cb=>{
+    if(cb.classList.contains('add-gender-cb')||cb.value==='S') cb.checked=true;
+    else if(cb.classList.contains('add-age-cb')||cb.value==='D') cb.checked=false;
+  });
+
+  const badge = document.getElementById('addBadge');
+  badge.style.display='block';
+  setTimeout(()=>badge.style.display='none',2000);
+
+  updateCustomTournamentList();
+  renderGantt();
+}
+
+function deleteCustomTournament(id){
+  if(!confirm('この大会を削除しますか？')) return;
+  customTournaments = customTournaments.filter(ct=>ct.id!==id);
+  const idx = tournaments.findIndex(t=>t.id===id);
+  if(idx>-1) tournaments.splice(idx,1);
+  saveCustomTournaments();
+  updateCustomTournamentList();
+  renderGantt();
+}
+
+function updateCustomTournamentList(){
+  const div = document.getElementById('customTournamentList');
+  if(!div) return;
+  if(customTournaments.length===0){
+    div.innerHTML='<div style="font-size:10px;color:var(--text3);text-align:center;padding:12px 0">まだ追加した大会はありません</div>';
+    return;
+  }
+  div.innerHTML = customTournaments.map(ct=>{
+    const color = GRADE_COLOR[ct.grade]||'#7e8da8';
+    const sm = ct.start.getMonth()+1, sd = ct.start.getDate();
+    const em = ct.end.getMonth()+1, ed = ct.end.getDate();
+    return '<div class="custom-tournament-item">' +
+      '<div>' +
+        '<div class="custom-tournament-name">'+ct.name+'</div>' +
+        '<div class="custom-tournament-meta">' +
+          '<span style="color:'+color+';font-weight:700">'+ct.grade+'</span>' +
+          '　'+sm+'/'+sd+'〜'+em+'/'+ed +
+          (ct.url ? '　<a href="'+ct.url+'" target="_blank" style="color:var(--accent);font-size:9px">URL</a>' : '') +
+        '</div>' +
+      '</div>' +
+      '<button class="delete-custom-btn" onclick="deleteCustomTournament('+ct.id+')">×</button>' +
+    '</div>';
+  }).join('');
+}
+
+
+// テニスベアから取得した締切日デフォルト値
+const DEADLINE_DEFAULTS = {
+  "月見野スプリング2026": "2026-03-24",
+  "第28回ヨネックスカップTTCアーリーサマージュニア": "2026-03-25",
+  "グリーンテニスプラザジュニアOP春「16・12」": "2026-03-17",
+  "相模原グリーンジュニアテニス大会4月大会": "2026-03-27",
+  "第17回SEEDジュニアカップ2026": "2026-03-28",
+  "ヨネックスチャレンジカップRSCジュニア春U12,U16": "2026-04-05",
+  "第14回桜田アーリーサマージュニアテニストーナメント": "2026-04-05",
+  "第10回むさしの村ジュニアテニストーナメント5月": "2026-04-06",
+  "高崎オープンジュニアspring2026": "2026-04-15",
+  "ジュンレオスプリングジュニアトーナメント2026": "2026-04-13",
+};
+
+function applyDeadlineDefaults(){
+  tournaments.forEach(t => {
+    if(!t.deadline && DEADLINE_DEFAULTS[t.name]){
+      const [yr,mo,da] = DEADLINE_DEFAULTS[t.name].split('-').map(Number);
+      t.deadline = new Date(yr, mo-1, da);
+    }
+  });
+}
+
+// ===== INIT =====
+loadSaved();
+loadCustomTournaments();
+applyDeadlineDefaults();
+renderGantt();
+updateURLs();
+updateCustomTournamentList();
+</script>
+</body>
+</html>
