@@ -920,6 +920,9 @@ select.filter-select option { background: var(--surface2); }
     <button class="warn-toggle-btn" id="warnToggleBtn" onclick="toggleWarnMode()">⚠ ダブルエントリー警告 ON</button>
     <button class="toggle-expired" onclick="printSchedule()" title="表示中の大会を印刷用リストで開く（PDF保存も可）">🖨 印刷/PDF</button>
     <button class="toggle-expired" onclick="exportICS()" title="エントリー済み大会をカレンダーアプリ用ファイルで書き出す">📅 カレンダー出力</button>
+    <button class="toggle-expired" onclick="exportData()" title="入力済みデータをファイルに保存（他の端末への引き継ぎ・バックアップ用）">📤 バックアップ</button>
+    <button class="toggle-expired" onclick="document.getElementById('importFileInput').click()" title="バックアップファイルを読み込んで復元">📥 復元</button>
+    <input type="file" id="importFileInput" accept="application/json" style="display:none" onchange="importData(this.files[0])">
   </div>
   <div class="filters">
     <!-- 年齢 -->
@@ -2261,6 +2264,45 @@ function exportICS(){
   a.href = url; a.download = 'tennis_calendar_2026.ics';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+// ===== バックアップ書き出し・読み込み（端末間の引き継ぎ・共有用）=====
+function exportData(){
+  const data = {
+    app: 'jt2026',
+    exportedAt: new Date().toISOString(),
+    jt2026: JSON.parse(localStorage.getItem('jt2026') || '[]'),
+    jt2026_custom: JSON.parse(localStorage.getItem('jt2026_custom') || '[]')
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const today = new Date();
+  const p = n => n<10?'0'+n:''+n;
+  a.href = url;
+  a.download = 'tennis_calendar_backup_'+today.getFullYear()+p(today.getMonth()+1)+p(today.getDate())+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importData(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    let data;
+    try { data = JSON.parse(e.target.result); }
+    catch(err){ alert('ファイルの読み込みに失敗しました（JSON形式が正しくありません）'); return; }
+    if(data.app !== 'jt2026' || !Array.isArray(data.jt2026)){
+      alert('このアプリのバックアップファイルではないようです');
+      return;
+    }
+    if(!confirm('現在このブラウザに保存されているデータを、読み込んだファイルの内容で上書きします。よろしいですか？')) return;
+    localStorage.setItem('jt2026', JSON.stringify(data.jt2026));
+    localStorage.setItem('jt2026_custom', JSON.stringify(data.jt2026_custom || []));
+    alert('読み込みました。ページを再読み込みします。');
+    location.reload();
+  };
+  reader.readAsText(file);
 }
 
 // ===== INIT =====
