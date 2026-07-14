@@ -251,18 +251,21 @@ select.filter-select option { background: var(--surface2); }
 
 .day-headers {
   display: flex;
-  height: 22px;
+  height: 36px;
   background: var(--surface2);
 }
 .day-cell {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  gap: 1px;
   color: var(--text3);
   border-right: 1px solid #e3e7ee;
   flex-shrink: 0;
 }
+.day-num { font-size: 13px; font-weight: 700; line-height: 1; }
+.day-dow { font-size: 10px; line-height: 1; opacity: 0.8; }
 .day-cell.week-start { border-right: 1px solid var(--border); }
 
 /* Rows */
@@ -1410,7 +1413,7 @@ let warnMode = true; // ダブルエントリー警告ON/OFF
 const inputMode = { yosen: 'range', honsen: 'range' };
 // 飛び飛び日付リスト
 const pickedDates = { yosen: [], honsen: [] };
-const DAY_W = 3.2;
+const DAY_W = 26;
 const Y_START = new Date(2026,1,1);
 const Y_END   = new Date(2027,0,1);
 const TOTAL_DAYS = (Y_END - Y_START) / 86400000;
@@ -1611,7 +1614,8 @@ function renderGantt(){
   });
   html += `</div>`;
 
-  // Day headers
+  // Day headers（毎日の日付＋曜日を表示）
+  const DOW_LABEL = ['日','月','火','水','木','金','土'];
   html += `<div class="day-headers">`;
   MONTHS_DEF.forEach(mo=>{
     for(let day=1;day<=mo.days;day++){
@@ -1619,9 +1623,10 @@ function renderGantt(){
       const dt = new Date(2026,mo.m-1,day);
       const dow = dt.getDay();
       let color = 'var(--text3)';
-      if(dow===0) color='#c62828';
-      else if(dow===6) color='#1565c0';
-      html += `<div class="day-cell" style="width:${w}px;min-width:${w}px;color:${color}">${day===1||day===5||day===10||day===15||day===20||day===25?day:''}</div>`;
+      let bg = '';
+      if(dow===0){ color='#c62828'; bg='background:rgba(198,40,40,0.06);'; }
+      else if(dow===6){ color='#1565c0'; bg='background:rgba(21,101,192,0.06);'; }
+      html += `<div class="day-cell" style="width:${w}px;min-width:${w}px;color:${color};${bg}"><span class="day-num">${day}</span><span class="day-dow">${DOW_LABEL[dow]}</span></div>`;
     }
   });
   html += `</div>`;
@@ -1777,6 +1782,10 @@ function renderGantt(){
 
   html += `</div>`;
   container.innerHTML = html;
+  // sticky列（チェック・大会名・グレード）が横スクロール中も正しく固定されるよう、
+  // コンテナ自身の幅を実際のタイムライン幅に合わせて明示的に広げる
+  const fixedColsW = window.innerWidth < 768 ? (34+130+38) : (42+300+52);
+  container.style.width = (fixedColsW + totalW) + 'px';
 
   // today line - inject into each sub-row div
   const today = new Date();
