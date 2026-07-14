@@ -891,6 +891,21 @@ select.filter-select option { background: var(--surface2); }
 ::-webkit-scrollbar-track { background: var(--surface); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #3e4a6e; }
+
+/* ===== PRINT VIEW ===== */
+.print-area { display: none; }
+.print-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.print-table th, .print-table td { border: 1px solid #ccc; padding: 5px 7px; text-align: left; vertical-align: top; }
+.print-table th { background: #eee; }
+.print-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.print-meta { font-size: 11px; color: #555; margin-bottom: 10px; }
+
+@media print {
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; }
+  @page { size: landscape; margin: 12mm; }
+}
 </style>
 </head>
 <body>
@@ -903,6 +918,8 @@ select.filter-select option { background: var(--surface2); }
     </div>
     <button class="reset-btn" onclick="resetFilters()">リセット</button>
     <button class="warn-toggle-btn" id="warnToggleBtn" onclick="toggleWarnMode()">⚠ ダブルエントリー警告 ON</button>
+    <button class="toggle-expired" onclick="printSchedule()" title="表示中の大会を印刷用リストで開く（PDF保存も可）">🖨 印刷/PDF</button>
+    <button class="toggle-expired" onclick="exportICS()" title="エントリー済み大会をカレンダーアプリ用ファイルで書き出す">📅 カレンダー出力</button>
   </div>
   <div class="filters">
     <!-- 年齢 -->
@@ -1171,6 +1188,7 @@ select.filter-select option { background: var(--surface2); }
 </div>
 
 <div class="tooltip" id="tooltip"></div>
+<div class="print-area" id="printArea"></div>
 
 <script>
 // ===== DATA =====
@@ -1617,13 +1635,29 @@ function renderGantt(){
     const checkedAttr = t.entered ? 'checked' : '';
     const barGlow = t.entered ? ';box-shadow:0 0 6px '+color+';outline:1px solid #4caf50;' : '';
 
+    // ===== 締切バッジ（大会名の下に日付・残り日数をテキスト表示）=====
+    let deadlineBadge;
+    if(t.deadline){
+      const today0 = new Date(); today0.setHours(0,0,0,0);
+      const dl0 = new Date(t.deadline); dl0.setHours(0,0,0,0);
+      const daysLeft = Math.round((dl0-today0)/86400000);
+      const dlStr = (dl0.getMonth()+1)+'/'+dl0.getDate();
+      let bg = '#545e78', fg = '#e8ecf4';
+      if(daysLeft >= 0 && daysLeft <= 7){ bg = 'var(--deadline)'; fg = '#000'; }
+      else if(daysLeft > 7 && daysLeft <= 14){ bg = '#ffb300'; fg = '#000'; }
+      const daysLabel = daysLeft < 0 ? '(終了)' : daysLeft === 0 ? '(本日締切)' : '(あと'+daysLeft+'日)';
+      deadlineBadge = '<span style="display:inline-block;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700;background:'+bg+';color:'+fg+'">締切 '+dlStr+' '+daysLabel+'</span>';
+    } else {
+      deadlineBadge = '<span style="display:inline-block;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700;background:transparent;border:1px dashed var(--text3);color:var(--text3)">締切未定</span>';
+    }
+
     // ===== 締切マーカー =====
     let dlMarker = '';
     if(t.deadline){
       const pos = dayOffset(t.deadline)*DAY_W;
       if(pos>=0&&pos<=totalW){
-        dlMarker = '<div style="position:absolute;left:'+pos+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--deadline);border-radius:50%;z-index:4;margin-left:-4px" title="締切"></div>';
-        dlMarker += '<div style="position:absolute;left:'+pos+'px;top:0;bottom:0;width:1px;background:var(--deadline);opacity:0.5;z-index:3"></div>';
+        dlMarker = '<div style="position:absolute;left:'+pos+'px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:var(--deadline);border:2px solid #fff;border-radius:50%;z-index:4;margin-left:-5px;box-shadow:0 0 4px rgba(0,0,0,0.6)" title="締切"></div>';
+        dlMarker += '<div style="position:absolute;left:'+pos+'px;top:0;bottom:0;width:2px;background:var(--deadline);opacity:0.7;z-index:3"></div>';
       }
     }
 
@@ -1686,6 +1720,7 @@ function renderGantt(){
     // 大会名列
     html += '<div class="gantt-row-label" onclick="selectEntry('+t.id+')" title="'+t.name.replace(/"/g,'&quot;')+'" style="height:60px;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:4px 8px;white-space:normal;line-height:1.3">';
     html += '<div style="font-size:10px;color:var(--text);font-weight:500;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+t.name+enteredBadge+'</div>';
+    html += '<div>'+deadlineBadge+'</div>';
     html += '</div>';
 
     // グレード列
@@ -1759,6 +1794,7 @@ function toggleEntryCheck(id, checkbox){
   if(!t) return;
   t.entered = checkbox.checked;
   saveToDB();
+  if(t.isCustom) saveCustomTournaments();
   renderGantt();
 }
 
@@ -1906,6 +1942,7 @@ function saveEntry(){
   }
 
   saveToDB();
+  if(t.isCustom) saveCustomTournaments();
   const badge = document.getElementById('savedBadge');
   badge.style.display='block';
   setTimeout(()=>badge.style.display='none',2000);
@@ -2164,9 +2201,71 @@ function applyDeadlineDefaults(){
   });
 }
 
+// ===== 印刷 / PDF出力 =====
+function printSchedule(){
+  const filtered = getFiltered().slice().sort((a,b)=>a.start-b.start);
+  const fmt = dt => dt ? (dt.getMonth()+1)+'/'+dt.getDate() : '未入力';
+  const rangeFmt = (s,e) => s ? fmt(s)+(e&&e.getTime()!==s.getTime()?'〜'+fmt(e):'') : '未入力';
+  const rows = filtered.map(t=>{
+    const yosen = (t.yosenDates&&t.yosenDates.length) ? t.yosenDates.map(x=>{const dt=new Date(x);return (dt.getMonth()+1)+'/'+dt.getDate();}).join('・') : rangeFmt(t.yosenStart,t.yosenEnd);
+    const honsen = (t.honsenDates&&t.honsenDates.length) ? t.honsenDates.map(x=>{const dt=new Date(x);return (dt.getMonth()+1)+'/'+dt.getDate();}).join('・') : rangeFmt(t.honsenStart,t.honsenEnd);
+    return '<tr>' +
+      '<td>'+(t.entered?'✓':'')+'</td>' +
+      '<td>'+t.grade+'</td>' +
+      '<td>'+t.name.replace(/</g,'&lt;')+'</td>' +
+      '<td>'+rangeFmt(t.start,t.end)+'</td>' +
+      '<td>'+fmt(t.deadline)+'</td>' +
+      '<td>'+yosen+'</td>' +
+      '<td>'+honsen+'</td>' +
+      '<td>'+(t.memo||'').replace(/</g,'&lt;')+'</td>' +
+    '</tr>';
+  }).join('');
+  const today = new Date();
+  document.getElementById('printArea').innerHTML =
+    '<div class="print-title">関東ジュニアテニス 大会カレンダー 2026</div>' +
+    '<div class="print-meta">印刷日: '+(today.getMonth()+1)+'/'+today.getDate()+'/'+today.getFullYear()+'　表示中 '+filtered.length+'件</div>' +
+    '<table class="print-table"><thead><tr>' +
+    '<th>済</th><th>Grade</th><th>大会名</th><th>期間</th><th>締切</th><th>予選</th><th>本戦</th><th>メモ</th>' +
+    '</tr></thead><tbody>'+rows+'</tbody></table>';
+  window.print();
+}
+
+// ===== カレンダー(.ics)出力 =====
+function icsEscape(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
+function icsDate(dt){ const p=n=>n<10?'0'+n:''+n; return dt.getFullYear()+p(dt.getMonth()+1)+p(dt.getDate()); }
+function exportICS(){
+  const entered = tournaments.filter(t=>t.entered);
+  if(entered.length===0){ alert('エントリー済みの大会がありません。まず「手入力・詳細」タブでエントリーにチェックを入れてください。'); return; }
+  let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//kanto-jr-tennis-supporter//tennis-calendar//JP\r\nCALSCALE:GREGORIAN\r\n';
+  entered.forEach(t=>{
+    const s = t.honsenStart || t.yosenStart || t.start;
+    const e = t.honsenEnd || t.yosenEnd || t.end || s;
+    if(!s) return;
+    const endExclusive = new Date(e); endExclusive.setDate(endExclusive.getDate()+1);
+    const descParts = [];
+    if(t.memo) descParts.push(t.memo);
+    if(t.customUrl||t.url) descParts.push(t.customUrl||t.url);
+    ics += 'BEGIN:VEVENT\r\n';
+    ics += 'UID:jt2026-'+t.id+'@kanto-jr-tennis-supporter\r\n';
+    ics += 'DTSTAMP:'+icsDate(new Date())+'T000000Z\r\n';
+    ics += 'DTSTART;VALUE=DATE:'+icsDate(s)+'\r\n';
+    ics += 'DTEND;VALUE=DATE:'+icsDate(endExclusive)+'\r\n';
+    ics += 'SUMMARY:'+icsEscape('['+t.grade+'] '+t.name)+'\r\n';
+    if(descParts.length) ics += 'DESCRIPTION:'+icsEscape(descParts.join('\n'))+'\r\n';
+    ics += 'END:VEVENT\r\n';
+  });
+  ics += 'END:VCALENDAR\r\n';
+  const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'tennis_calendar_2026.ics';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // ===== INIT =====
-loadSaved();
 loadCustomTournaments();
+loadSaved();
 applyDeadlineDefaults();
 renderGantt();
 updateURLs();
