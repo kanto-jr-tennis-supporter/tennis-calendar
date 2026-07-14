@@ -7,30 +7,30 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0f1117;
-  --surface: #181c27;
-  --surface2: #1e2334;
-  --surface3: #252b3e;
-  --border: #2e3650;
-  --text: #e8ecf4;
-  --text2: #8b95b0;
-  --text3: #545e78;
-  --accent: #4fc3f7;
+  --bg: #eef1f6;
+  --surface: #ffffff;
+  --surface2: #f4f6fa;
+  --surface3: #e8ecf3;
+  --border: #c7cede;
+  --text: #1a1f2e;
+  --text2: #3d4459;
+  --text3: #5b6478;
+  --accent: #0d6ab8;
 
-  --g1: #ff3b3b;
-  --g2: #ff7043;
-  --g3a: #ffb300;
-  --g3b: #ffd54f;
-  --g4a: #66bb6a;
-  --g4b: #4db6ac;
-  --g4c: #42a5f5;
-  --g4d: #7e8da8;
-  --itf: #ce93d8;
-  --gakuren: #80cbc4;
-  --deadline: #ff4081;
-  --yosen: #a5d6a7;
-  --honsen: #fff176;
-  --yobi: #b0bec5;
+  --g1: #d32f2f;
+  --g2: #ef6c00;
+  --g3a: #f9a825;
+  --g3b: #827717;
+  --g4a: #2e7d32;
+  --g4b: #00695c;
+  --g4c: #1565c0;
+  --g4d: #5c6bc0;
+  --itf: #7b1fa2;
+  --gakuren: #00695c;
+  --deadline: #c2185b;
+  --yosen: #00838f;
+  --honsen: #283593;
+  --yobi: #757575;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,12 +42,15 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
+@media (min-width: 769px) {
+  body { height: 100vh; overflow-y: hidden; display: flex; flex-direction: column; }
+}
 
 /* ===== HEADER ===== */
 .header {
-  background: linear-gradient(135deg, #0d1b3e 0%, #1a0533 50%, #0d1b3e 100%);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 20px 12px;
+  background: var(--surface);
+  border-bottom: 3px solid var(--accent);
+  padding: 18px 20px 14px;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -55,23 +58,24 @@ body {
 .header-top {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 14px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
 }
 .header-title {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 800;
   letter-spacing: 1px;
-  color: #fff;
+  color: var(--text);
 }
 .header-title span {
   color: var(--accent);
 }
 .header-year {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--text3);
   letter-spacing: 2px;
 }
@@ -93,17 +97,17 @@ body {
   padding: 5px 10px;
 }
 .filter-label {
-  font-size: 10px;
+  font-size: 13px;
   color: var(--text3);
   font-weight: 700;
   letter-spacing: 1px;
   white-space: nowrap;
 }
 .filter-btn {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text2);
@@ -114,17 +118,17 @@ body {
 .filter-btn:hover { background: var(--surface3); color: var(--text); }
 .filter-btn.active {
   background: var(--accent);
-  color: #000;
+  color: #fff;
   border-color: var(--accent);
 }
-.filter-btn.age-active-1 { background: #4fc3f7; color: #000; border-color: #4fc3f7; }
-.filter-btn.age-active-2 { background: #f48fb1; color: #000; border-color: #f48fb1; }
+.filter-btn.age-active-1 { background: #1e88e5; color: #fff; border-color: #1e88e5; }
+.filter-btn.age-active-2 { background: #d81b60; color: #fff; border-color: #d81b60; }
 
 .grade-btn { color: var(--text2); }
-.grade-btn.active { color: #000 !important; }
+.grade-btn.active { color: #fff !important; }
 
 select.filter-select {
-  font-size: 11px;
+  font-size: 14px;
   background: transparent;
   color: var(--text2);
   border: none;
@@ -135,17 +139,18 @@ select.filter-select {
 select.filter-select option { background: var(--surface2); }
 
 .reset-btn {
-  font-size: 10px;
-  padding: 4px 10px;
+  font-size: 13px;
+  padding: 6px 14px;
   border-radius: 6px;
-  border: 1px solid #ff4081;
+  border: 1px solid var(--deadline);
   background: transparent;
-  color: #ff4081;
+  color: var(--deadline);
   cursor: pointer;
   font-family: 'Noto Sans JP', sans-serif;
   transition: all 0.15s;
+  font-weight: 700;
 }
-.reset-btn:hover { background: #ff4081; color: #fff; }
+.reset-btn:hover { background: var(--deadline); color: #fff; }
 
 /* ===== COUNT BAR ===== */
 .count-bar {
@@ -158,28 +163,30 @@ select.filter-select option { background: var(--surface2); }
 }
 .count-num {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--accent);
 }
-.count-label { font-size: 11px; color: var(--text3); }
+.count-label { font-size: 13px; color: var(--text3); }
 .legend-inline {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   margin-left: auto;
   align-items: center;
 }
-.leg { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text3); }
-.leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-.leg-line { width: 12px; height: 3px; flex-shrink: 0; border-radius: 1px; }
+.leg { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text2); font-weight: 500; }
+.leg-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.leg-line { width: 14px; height: 4px; flex-shrink: 0; border-radius: 1px; }
 
 /* ===== MAIN LAYOUT ===== */
 .main {
   display: grid;
   grid-template-columns: 1fr 360px;
-  height: calc(100vh - 140px);
   min-height: 500px;
+}
+@media (min-width: 769px) {
+  .main { flex: 1; min-height: 0; }
 }
 
 /* ===== GANTT ===== */
@@ -201,22 +208,22 @@ select.filter-select option { background: var(--surface2); }
   border-bottom: 2px solid var(--border);
 }
 .gantt-label-col {
-  min-width: 260px;
-  width: 260px;
+  min-width: 300px;
+  width: 300px;
   flex-shrink: 0;
   background: var(--surface);
   position: sticky;
-  left: 36px;
+  left: 42px;
   z-index: 25;
   border-right: 1px solid var(--border);
 }
 .gantt-grade-col {
-  min-width: 44px;
-  width: 44px;
+  min-width: 52px;
+  width: 52px;
   flex-shrink: 0;
   background: var(--surface);
   position: sticky;
-  left: 296px;
+  left: 342px;
   z-index: 25;
   border-right: 2px solid var(--border);
 }
@@ -227,14 +234,14 @@ select.filter-select option { background: var(--surface2); }
 
 .month-headers {
   display: flex;
-  height: 24px;
+  height: 28px;
 }
 .month-cell {
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 1px;
   border-right: 1px solid var(--border);
@@ -244,61 +251,61 @@ select.filter-select option { background: var(--surface2); }
 
 .day-headers {
   display: flex;
-  height: 18px;
+  height: 22px;
   background: var(--surface2);
 }
 .day-cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 8px;
+  font-size: 11px;
   color: var(--text3);
-  border-right: 1px solid #1a2030;
+  border-right: 1px solid #e3e7ee;
   flex-shrink: 0;
 }
-.day-cell.week-start { border-right: 1px solid #2e3650; }
+.day-cell.week-start { border-right: 1px solid var(--border); }
 
 /* Rows */
 .gantt-body { }
 .gantt-row {
   display: flex;
-  height: 60px;
-  border-bottom: 1px solid #191e2d;
+  height: 78px;
+  border-bottom: 1px solid #e3e7ee;
   transition: background 0.1s;
 }
-.gantt-row:hover { background: rgba(255,255,255,0.03); }
+.gantt-row:hover { background: rgba(13,106,184,0.05); }
 .gantt-row-label {
-  min-width: 260px;
-  width: 260px;
+  min-width: 300px;
+  width: 300px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  padding: 0 8px;
-  font-size: 10px;
+  padding: 0 10px;
+  font-size: 13px;
   color: var(--text2);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   background: var(--surface);
   position: sticky;
-  left: 36px;
+  left: 42px;
   z-index: 10;
   cursor: pointer;
   border-right: 1px solid var(--border);
 }
 .gantt-row-label:hover { color: var(--text); }
 .gantt-row-grade {
-  min-width: 44px;
-  width: 44px;
+  min-width: 52px;
+  width: 52px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
   background: var(--surface);
   position: sticky;
-  left: 296px;
+  left: 342px;
   z-index: 10;
   border-right: 2px solid var(--border);
 }
@@ -371,18 +378,19 @@ select.filter-select option { background: var(--surface2); }
   top: 0;
   bottom: 0;
   width: 2px;
-  background: #fff;
-  opacity: 0.3;
+  background: #e53935;
+  opacity: 0.7;
   z-index: 4;
   pointer-events: none;
 }
-.today-line::after {
+.today-line.with-label::after {
   content: 'TODAY';
   position: absolute;
-  top: -18px;
-  left: -18px;
-  font-size: 8px;
-  color: rgba(255,255,255,0.5);
+  top: -20px;
+  left: -20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #e53935;
   font-family: 'Barlow Condensed', sans-serif;
   letter-spacing: 1px;
 }
@@ -390,20 +398,20 @@ select.filter-select option { background: var(--surface2); }
 /* ===== TOOLTIP ===== */
 .tooltip {
   position: fixed;
-  background: var(--surface3);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 11px;
-  max-width: 280px;
+  padding: 12px 16px;
+  font-size: 13px;
+  max-width: 300px;
   z-index: 1000;
   pointer-events: none;
   display: none;
   line-height: 1.7;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
 }
 .tooltip-name {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text);
   margin-bottom: 6px;
@@ -414,15 +422,15 @@ select.filter-select option { background: var(--surface2); }
   gap: 8px;
   align-items: center;
 }
-.tooltip-key { color: var(--text3); min-width: 56px; font-size: 10px; }
+.tooltip-key { color: var(--text3); min-width: 60px; font-size: 12px; }
 .tooltip-val { color: var(--text); font-weight: 500; }
 .tooltip-badge {
   display: inline-block;
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
-  color: #000;
+  color: #fff;
 }
 
 /* ===== SIDE PANEL ===== */
@@ -439,8 +447,8 @@ select.filter-select option { background: var(--surface2); }
 }
 .side-tab {
   flex: 1;
-  padding: 10px;
-  font-size: 11px;
+  padding: 12px 6px;
+  font-size: 13px;
   font-weight: 700;
   text-align: center;
   cursor: pointer;
@@ -451,12 +459,12 @@ select.filter-select option { background: var(--surface2); }
 .side-tab.active {
   color: var(--accent);
   border-bottom-color: var(--accent);
-  background: rgba(79,195,247,0.05);
+  background: rgba(13,106,184,0.06);
 }
 .side-content {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: 14px;
 }
 .side-section { display: none; }
 .side-section.active { display: block; }
@@ -467,8 +475,8 @@ select.filter-select option { background: var(--surface2); }
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 7px 10px;
-  font-size: 11px;
+  padding: 9px 12px;
+  font-size: 14px;
   color: var(--text);
   font-family: 'Noto Sans JP', sans-serif;
   margin-bottom: 10px;
@@ -476,31 +484,31 @@ select.filter-select option { background: var(--surface2); }
 }
 .entry-search:focus { border-color: var(--accent); }
 
-.entry-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.entry-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
 .entry-item {
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 7px 10px;
+  padding: 9px 12px;
   cursor: pointer;
   transition: all 0.15s;
-  font-size: 10px;
+  font-size: 13px;
 }
 .entry-item:hover { border-color: var(--accent); background: var(--surface3); }
-.entry-item.selected { border-color: var(--accent); background: rgba(79,195,247,0.1); }
-.entry-item-name { font-size: 11px; color: var(--text); margin-bottom: 2px; font-weight: 500; }
+.entry-item.selected { border-color: var(--accent); background: rgba(13,106,184,0.08); }
+.entry-item-name { font-size: 14px; color: var(--text); margin-bottom: 3px; font-weight: 500; }
 .entry-item-meta { color: var(--text3); }
 
 .entry-form {
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 12px;
+  padding: 14px;
   display: none;
 }
 .entry-form.visible { display: block; }
 .entry-form-title {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text);
   margin-bottom: 10px;
@@ -512,49 +520,49 @@ select.filter-select option { background: var(--surface2); }
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 7px;
+  margin-bottom: 8px;
 }
 .form-key {
-  font-size: 10px;
-  color: var(--text3);
-  min-width: 64px;
+  font-size: 13px;
+  color: var(--text2);
+  min-width: 68px;
   font-weight: 500;
 }
 .form-input {
   flex: 1;
-  background: var(--surface3);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 4px 7px;
-  font-size: 11px;
+  padding: 6px 9px;
+  font-size: 14px;
   color: var(--text);
   font-family: 'Noto Sans JP', sans-serif;
   outline: none;
 }
 .form-input:focus { border-color: var(--accent); }
 .form-marker-dot {
-  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
 }
 .save-btn {
   width: 100%;
   margin-top: 8px;
-  padding: 8px;
+  padding: 10px;
   background: var(--accent);
-  color: #000;
+  color: #fff;
   border: none;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   font-family: 'Noto Sans JP', sans-serif;
   transition: all 0.15s;
 }
-.save-btn:hover { background: #81d4fa; }
+.save-btn:hover { background: #0f7cd4; }
 .saved-badge {
   display: none;
   text-align: center;
-  font-size: 10px;
-  color: #66bb6a;
+  font-size: 13px;
+  color: #2e7d32;
   margin-top: 6px;
   font-weight: 700;
 }
@@ -563,41 +571,41 @@ select.filter-select option { background: var(--surface2); }
 .conflict-section { }
 .conflict-item {
   background: var(--surface2);
-  border: 1px solid #ff4081;
+  border: 1px solid var(--deadline);
   border-radius: 8px;
-  padding: 8px 10px;
-  margin-bottom: 6px;
-  font-size: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
 }
-.conflict-title { font-size: 11px; color: #ff4081; font-weight: 700; margin-bottom: 4px; }
+.conflict-title { font-size: 14px; color: var(--deadline); font-weight: 700; margin-bottom: 4px; }
 .conflict-name { color: var(--text); margin-bottom: 2px; }
 .conflict-meta { color: var(--text3); }
 .no-conflict {
   text-align: center;
   padding: 30px 0;
   color: var(--text3);
-  font-size: 12px;
+  font-size: 14px;
 }
-.no-conflict .icon { font-size: 28px; margin-bottom: 8px; }
+.no-conflict .icon { font-size: 30px; margin-bottom: 8px; }
 
 /* URL list */
 .url-item {
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 8px 10px;
-  margin-bottom: 5px;
-  font-size: 10px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  font-size: 13px;
 }
-.url-name { color: var(--text); font-weight: 500; margin-bottom: 3px; font-size: 11px; }
+.url-name { color: var(--text); font-weight: 500; margin-bottom: 4px; font-size: 14px; }
 .url-link { color: var(--accent); text-decoration: none; word-break: break-all; }
 .url-link:hover { text-decoration: underline; }
-.url-grade { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; color: #000; margin-left: 4px; }
+.url-grade { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 12px; font-weight: 700; color: #fff; margin-left: 4px; }
 
 /* Entry checkbox column */
 .gantt-check-col {
-  min-width: 36px;
-  width: 36px;
+  min-width: 42px;
+  width: 42px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -608,31 +616,31 @@ select.filter-select option { background: var(--surface2); }
   z-index: 11;
   border-right: 1px solid var(--border);
 }
-.gantt-label-col { left: 36px !important; }
-.gantt-grade-col { left: 296px !important; }
+.gantt-label-col { left: 42px !important; }
+.gantt-grade-col { left: 342px !important; }
 
 .entry-check {
-  width: 15px; height: 15px;
+  width: 19px; height: 19px;
   cursor: pointer;
-  accent-color: #4caf50;
+  accent-color: #2e7d32;
 }
 .gantt-row.is-entered .gantt-row-label {
-  color: #4caf50;
+  color: #2e7d32;
   font-weight: 700;
 }
 .gantt-row.is-entered .gantt-check-col {
-  background: rgba(76,175,80,0.08);
+  background: rgba(46,125,50,0.10);
 }
 .gantt-row.is-expired-row {
-  opacity: 0.3;
+  opacity: 0.45;
 }
 .entered-badge {
   display: inline-block;
-  background: #4caf50;
-  color: #000;
-  font-size: 8px;
+  background: #2e7d32;
+  color: #fff;
+  font-size: 11px;
   font-weight: 700;
-  padding: 1px 4px;
+  padding: 2px 6px;
   border-radius: 3px;
   margin-left: 4px;
   vertical-align: middle;
@@ -640,37 +648,37 @@ select.filter-select option { background: var(--surface2); }
 
 /* Show-expired toggle */
 .toggle-expired {
-  font-size: 11px;
-  padding: 3px 10px;
+  font-size: 13px;
+  padding: 6px 12px;
   border-radius: 6px;
   border: 1px solid var(--border);
   background: transparent;
-  color: var(--text3);
+  color: var(--text2);
   cursor: pointer;
   font-family: 'Noto Sans JP', sans-serif;
   transition: all 0.15s;
   white-space: nowrap;
 }
-.toggle-expired.active { border-color: #ff7043; color: #ff7043; }
+.toggle-expired.active { border-color: #bf360c; color: #bf360c; }
 
 /* Form section labels */
 .form-section-label {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 10px;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text2);
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 .mode-toggle {
   display: flex;
-  gap: 3px;
+  gap: 4px;
   margin-left: auto;
 }
 .mode-btn {
-  font-size: 9px;
-  padding: 2px 7px;
+  font-size: 12px;
+  padding: 3px 9px;
   border-radius: 4px;
   border: 1px solid var(--border);
   background: transparent;
@@ -681,23 +689,23 @@ select.filter-select option { background: var(--surface2); }
 }
 .mode-btn.active {
   background: var(--accent);
-  color: #000;
+  color: #fff;
   border-color: var(--accent);
 }
 .date-pick-row {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-bottom: 4px;
+  gap: 5px;
+  margin-bottom: 5px;
 }
 .date-pick-row .form-input { flex: 1; }
 .remove-date-btn {
-  width: 18px; height: 18px;
+  width: 22px; height: 22px;
   border-radius: 50%;
-  border: 1px solid #ff4081;
+  border: 1px solid var(--deadline);
   background: transparent;
-  color: #ff4081;
-  font-size: 12px;
+  color: var(--deadline);
+  font-size: 14px;
   line-height: 1;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
@@ -705,8 +713,8 @@ select.filter-select option { background: var(--surface2); }
   padding: 0;
 }
 .add-date-btn {
-  font-size: 10px;
-  padding: 3px 8px;
+  font-size: 13px;
+  padding: 5px 10px;
   border-radius: 5px;
   border: 1px dashed var(--border);
   background: transparent;
@@ -721,14 +729,14 @@ select.filter-select option { background: var(--surface2); }
 
 /* Double entry warning */
 .de-warning {
-  background: rgba(255,64,129,0.12);
-  border: 1px solid #ff4081;
+  background: rgba(194,24,91,0.08);
+  border: 1px solid var(--deadline);
   border-radius: 8px;
-  padding: 8px 10px;
-  margin-bottom: 6px;
-  font-size: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
 }
-.de-warning-title { color: #ff4081; font-weight: 700; margin-bottom: 4px; font-size: 11px; }
+.de-warning-title { color: var(--deadline); font-weight: 700; margin-bottom: 4px; font-size: 14px; }
 .de-warning-names { color: var(--text); line-height: 1.6; }
 .de-off { opacity: 0.5; text-decoration: line-through; }
 
@@ -737,18 +745,18 @@ select.filter-select option { background: var(--surface2); }
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 12px;
+  padding: 14px;
 }
 .add-age-label {
   display: flex;
   align-items: center;
-  gap: 3px;
-  font-size: 11px;
+  gap: 4px;
+  font-size: 13px;
   color: var(--text2);
-  background: var(--surface3);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 5px;
-  padding: 3px 8px;
+  padding: 5px 10px;
   cursor: pointer;
   transition: all 0.12s;
 }
@@ -759,22 +767,22 @@ select.filter-select option { background: var(--surface2); }
   border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
   border-radius: 7px;
-  padding: 7px 10px;
-  margin-bottom: 5px;
-  font-size: 10px;
+  padding: 9px 12px;
+  margin-bottom: 6px;
+  font-size: 13px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 6px;
 }
-.custom-tournament-name { color: var(--text); font-size: 11px; font-weight: 500; margin-bottom: 2px; }
+.custom-tournament-name { color: var(--text); font-size: 14px; font-weight: 500; margin-bottom: 2px; }
 .custom-tournament-meta { color: var(--text3); }
 .delete-custom-btn {
   background: transparent;
   border: none;
-  color: #ff4081;
+  color: var(--deadline);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 18px;
   padding: 0;
   line-height: 1;
   flex-shrink: 0;
@@ -782,12 +790,12 @@ select.filter-select option { background: var(--surface2); }
 
 /* Warning toggle button in filter bar */
 .warn-toggle-btn {
-  font-size: 10px;
-  padding: 3px 10px;
+  font-size: 13px;
+  padding: 6px 12px;
   border-radius: 6px;
-  border: 1px solid #ff4081;
-  background: rgba(255,64,129,0.15);
-  color: #ff4081;
+  border: 1px solid var(--deadline);
+  background: rgba(194,24,91,0.08);
+  color: var(--deadline);
   cursor: pointer;
   font-family: 'Noto Sans JP', sans-serif;
   transition: all 0.15s;
@@ -805,20 +813,20 @@ select.filter-select option { background: var(--surface2); }
   /* ヘッダー */
   .header { padding: 10px 12px 8px; }
   .header-top { flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-  .header-title { font-size: 18px; }
-  .header-year { font-size: 11px; }
-  .warn-toggle-btn { font-size: 9px; padding: 2px 7px; }
-  .reset-btn { font-size: 9px; padding: 3px 8px; }
+  .header-title { font-size: 21px; }
+  .header-year { font-size: 13px; }
+  .warn-toggle-btn { font-size: 12px; padding: 5px 10px; }
+  .reset-btn { font-size: 12px; padding: 5px 10px; }
 
   /* フィルター */
   .filters { gap: 5px; }
-  .filter-group { padding: 4px 8px; gap: 4px; flex-wrap: wrap; }
-  .filter-label { font-size: 9px; }
-  .filter-btn { font-size: 10px; padding: 3px 7px; }
+  .filter-group { padding: 5px 8px; gap: 5px; flex-wrap: wrap; }
+  .filter-label { font-size: 11px; }
+  .filter-btn { font-size: 13px; padding: 5px 10px; }
 
   /* カウントバー */
-  .count-bar { padding: 5px 10px; flex-wrap: wrap; gap: 6px; }
-  .count-num { font-size: 16px; }
+  .count-bar { padding: 6px 10px; flex-wrap: wrap; gap: 6px; }
+  .count-num { font-size: 19px; }
   .legend-inline { display: none; }
 
   /* メインレイアウト：縦並び */
@@ -832,37 +840,37 @@ select.filter-select option { background: var(--surface2); }
     border-bottom: 2px solid var(--border);
   }
 
-  /* スマホ用列幅：大会名を100pxに絞る */
-  .gantt-check-col { min-width: 28px; width: 28px; }
+  /* スマホ用列幅：大会名を130pxに絞る */
+  .gantt-check-col { min-width: 34px; width: 34px; }
   .gantt-label-col {
-    min-width: 100px !important;
-    width: 100px !important;
-    left: 28px !important;
+    min-width: 130px !important;
+    width: 130px !important;
+    left: 34px !important;
   }
   .gantt-grade-col {
-    min-width: 30px !important;
-    width: 30px !important;
-    left: 128px !important;
+    min-width: 38px !important;
+    width: 38px !important;
+    left: 164px !important;
   }
   .gantt-row-label {
-    min-width: 100px !important;
-    width: 100px !important;
-    left: 28px !important;
-    font-size: 9px !important;
-    padding: 2px 4px !important;
+    min-width: 130px !important;
+    width: 130px !important;
+    left: 34px !important;
+    font-size: 12px !important;
+    padding: 2px 6px !important;
     /* スクロール時に半透明でフェード */
     opacity: 0.92;
     transition: opacity 0.2s;
   }
   .gantt-row-label:hover { opacity: 1; }
   .gantt-row-grade {
-    min-width: 30px !important;
-    width: 30px !important;
-    left: 128px !important;
-    font-size: 8px !important;
+    min-width: 38px !important;
+    width: 38px !important;
+    left: 164px !important;
+    font-size: 11px !important;
   }
-  .entry-check { width: 13px; height: 13px; }
-  .entered-badge { font-size: 7px; padding: 1px 3px; }
+  .entry-check { width: 17px; height: 17px; }
+  .entered-badge { font-size: 10px; padding: 1px 4px; }
 
   /* サイドパネル下部 */
   .side-panel {
@@ -872,33 +880,33 @@ select.filter-select option { background: var(--surface2); }
     min-height: 300px;
   }
 
-  .side-tab { font-size: 10px; padding: 8px 4px; }
-  .form-input { font-size: 11px; padding: 4px 6px; }
-  .save-btn { font-size: 11px; padding: 8px; }
-  .add-form-card { padding: 8px; }
-  .entry-item-name { font-size: 10px; }
-  .add-age-label { font-size: 10px; padding: 3px 6px; }
+  .side-tab { font-size: 12px; padding: 9px 4px; }
+  .form-input { font-size: 13px; padding: 6px 8px; }
+  .save-btn { font-size: 13px; padding: 9px; }
+  .add-form-card { padding: 10px; }
+  .entry-item-name { font-size: 13px; }
+  .add-age-label { font-size: 12px; padding: 4px 8px; }
 }
 
 @media (max-width: 480px) {
-  .header-title { font-size: 15px; }
-  .filter-btn { font-size: 9px; padding: 2px 6px; }
-  .side-tab { font-size: 9px; padding: 7px 2px; }
+  .header-title { font-size: 17px; }
+  .filter-btn { font-size: 11px; padding: 4px 8px; }
+  .side-tab { font-size: 11px; padding: 7px 3px; }
 }
 
 /* スクロールバー */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--surface); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #3e4a6e; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #9aa4bd; }
 
 /* ===== PRINT VIEW ===== */
 .print-area { display: none; }
-.print-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-.print-table th, .print-table td { border: 1px solid #ccc; padding: 5px 7px; text-align: left; vertical-align: top; }
+.print-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.print-table th, .print-table td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; vertical-align: top; }
 .print-table th { background: #eee; }
-.print-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-.print-meta { font-size: 11px; color: #555; margin-bottom: 10px; }
+.print-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.print-meta { font-size: 13px; color: #555; margin-bottom: 10px; }
 
 @media print {
   body * { visibility: hidden; }
@@ -1011,7 +1019,7 @@ select.filter-select option { background: var(--surface2); }
 
       <!-- Entry Section -->
       <div class="side-section active" id="tab-entry">
-        <p style="font-size:10px;color:var(--text3);margin-bottom:8px">大会を選択して詳細日程を入力</p>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:8px">大会を選択して詳細日程を入力</p>
         <input class="entry-search" type="text" placeholder="大会名で検索..." id="entrySearch" oninput="filterEntryList()">
         <div class="entry-list" id="entryList"></div>
         <div class="entry-form" id="entryForm">
@@ -1038,7 +1046,7 @@ select.filter-select option { background: var(--surface2); }
           <div id="yosen-range-input">
             <div class="form-row">
               <input class="form-input" type="date" id="inp-yosen-start">
-              <span style="color:var(--text3);font-size:10px;padding:0 2px">〜</span>
+              <span style="color:var(--text3);font-size:13px;padding:0 2px">〜</span>
               <input class="form-input" type="date" id="inp-yosen-end">
             </div>
           </div>
@@ -1059,7 +1067,7 @@ select.filter-select option { background: var(--surface2); }
           <div id="honsen-range-input">
             <div class="form-row">
               <input class="form-input" type="date" id="inp-honsen-start">
-              <span style="color:var(--text3);font-size:10px;padding:0 2px">〜</span>
+              <span style="color:var(--text3);font-size:13px;padding:0 2px">〜</span>
               <input class="form-input" type="date" id="inp-honsen-end">
             </div>
           </div>
@@ -1094,13 +1102,13 @@ select.filter-select option { background: var(--surface2); }
 
       <!-- Conflict Section -->
       <div class="side-section" id="tab-conflict">
-        <p style="font-size:10px;color:var(--text3);margin-bottom:10px">エントリー済み大会の日程重複を自動検出</p>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:10px">エントリー済み大会の日程重複を自動検出</p>
         <div id="conflictList"></div>
       </div>
 
       <!-- Add Tournament Section -->
       <div class="side-section" id="tab-add">
-        <p style="font-size:10px;color:var(--text3);margin-bottom:10px">テニスベア・JOP等で見つけた大会を追加</p>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:10px">テニスベア・JOP等で見つけた大会を追加</p>
 
         <div class="add-form-card">
           <div class="form-section-label" style="margin-bottom:8px;font-size:11px;color:var(--text)">大会基本情報</div>
@@ -1126,11 +1134,11 @@ select.filter-select option { background: var(--surface2); }
           <div class="form-row" style="margin-bottom:6px">
             <span class="form-key" style="min-width:52px">開始日</span>
             <input class="form-input" type="date" id="add-start">
-            <span style="color:var(--text3);font-size:10px;padding:0 2px">〜</span>
+            <span style="color:var(--text3);font-size:13px;padding:0 2px">〜</span>
             <input class="form-input" type="date" id="add-end">
           </div>
 
-          <div class="form-section-label" style="margin:8px 0 4px;font-size:10px">対象年齢（複数選択可）</div>
+          <div class="form-section-label" style="margin:8px 0 4px;font-size:13px">対象年齢（複数選択可）</div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
             <label class="add-age-label"><input type="checkbox" value="12" class="add-age-cb"> U12</label>
             <label class="add-age-label"><input type="checkbox" value="14" class="add-age-cb"> U14</label>
@@ -1138,7 +1146,7 @@ select.filter-select option { background: var(--surface2); }
             <label class="add-age-label"><input type="checkbox" value="18" class="add-age-cb"> U18</label>
           </div>
 
-          <div class="form-section-label" style="margin-bottom:4px;font-size:10px">性別・種目</div>
+          <div class="form-section-label" style="margin-bottom:4px;font-size:13px">性別・種目</div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
             <label class="add-age-label"><input type="checkbox" value="男" class="add-gender-cb" checked> 男</label>
             <label class="add-age-label"><input type="checkbox" value="女" class="add-gender-cb" checked> 女</label>
@@ -1155,7 +1163,7 @@ select.filter-select option { background: var(--surface2); }
             <input class="form-input" type="text" id="add-memo" placeholder="例: JOPより追加">
           </div>
 
-          <div class="form-section-label" style="margin:8px 0 4px;font-size:10px">締切日・本戦日（わかれば）</div>
+          <div class="form-section-label" style="margin:8px 0 4px;font-size:13px">締切日・本戦日（わかれば）</div>
           <div class="form-row" style="margin-bottom:4px">
             <div class="form-marker-dot" style="background:var(--deadline)"></div>
             <span class="form-key" style="min-width:44px">締切</span>
@@ -1165,7 +1173,7 @@ select.filter-select option { background: var(--surface2); }
             <div class="form-marker-dot" style="background:var(--honsen)"></div>
             <span class="form-key" style="min-width:44px">本戦</span>
             <input class="form-input" type="date" id="add-honsen-start">
-            <span style="color:var(--text3);font-size:10px;padding:0 2px">〜</span>
+            <span style="color:var(--text3);font-size:13px;padding:0 2px">〜</span>
             <input class="form-input" type="date" id="add-honsen-end">
           </div>
 
@@ -1175,14 +1183,14 @@ select.filter-select option { background: var(--surface2); }
 
         <!-- 追加済み大会一覧 -->
         <div style="margin-top:12px">
-          <div class="form-section-label" style="font-size:10px;margin-bottom:6px">追加済み大会</div>
+          <div class="form-section-label" style="font-size:13px;margin-bottom:6px">追加済み大会</div>
           <div id="customTournamentList"></div>
         </div>
       </div>
 
       <!-- URLs Section -->
       <div class="side-section" id="tab-urls">
-        <p style="font-size:10px;color:var(--text3);margin-bottom:10px">テニスベア・JOP 大会URL一覧（目視確認用）</p>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:10px">テニスベア・JOP 大会URL一覧（目視確認用）</p>
         <div id="urlList"></div>
       </div>
 
@@ -1196,9 +1204,9 @@ select.filter-select option { background: var(--surface2); }
 <script>
 // ===== DATA =====
 const GRADE_COLOR = {
-  G1:'#ff3b3b', G2:'#ff7043', G3A:'#ffb300', G3B:'#ffd54f',
-  G4A:'#66bb6a', G4B:'#4db6ac', G4C:'#42a5f5', G4D:'#7e8da8',
-  ITF:'#ce93d8', '学連':'#80cbc4'
+  G1:'#d32f2f', G2:'#ef6c00', G3A:'#f9a825', G3B:'#827717',
+  G4A:'#2e7d32', G4B:'#00695c', G4C:'#1565c0', G4D:'#5c6bc0',
+  ITF:'#7b1fa2', '学連':'#00695c'
 };
 
 function d(m,day,yr=2026){return new Date(yr,m-1,day);}
@@ -1461,7 +1469,7 @@ function toggleGrade(btn){
     selectedGrades.push(g);
     btn.classList.add('active');
     btn.style.background=color;
-    btn.style.color='#000';
+    btn.style.color='#fff';
     btn.style.borderColor=color;
   }
   renderGantt();
@@ -1588,18 +1596,18 @@ function renderGantt(){
   const totalW = TOTAL_DAYS * DAY_W;
 
   let html = '<div class="gantt-header">';
-  html += '<div class="gantt-check-col" style="font-size:9px;color:var(--text3);padding:4px 0;align-items:flex-end;justify-content:center;height:60px">✓</div>';
-  html += '<div class="gantt-label-col" style="display:flex;align-items:flex-end;padding:4px 8px;font-size:9px;color:var(--text3);height:60px">大会名</div>';
-  html += '<div class="gantt-grade-col" style="display:flex;align-items:flex-end;justify-content:center;padding:4px 2px;font-size:9px;color:var(--text3);height:60px">G</div>';
+  html += '<div class="gantt-check-col" style="font-size:13px;color:var(--text3);padding:6px 0;align-items:flex-end;justify-content:center;height:78px">✓</div>';
+  html += '<div class="gantt-label-col" style="display:flex;align-items:flex-end;padding:6px 10px;font-size:13px;color:var(--text3);height:78px">大会名</div>';
+  html += '<div class="gantt-grade-col" style="display:flex;align-items:flex-end;justify-content:center;padding:6px 2px;font-size:13px;color:var(--text3);height:78px">G</div>';
   html += '<div class="gantt-timeline">';
 
   // Month headers
   html += `<div class="month-headers">`;
   MONTHS_DEF.forEach(mo=>{
     const w = mo.days * DAY_W;
-    const colors = ['#1a2540','#1e2940','#1a3040','#1e3540','#1a2d3a','#1e2840','#1a2030','#1e2a40','#1a2840','#1e3040','#1a2540'];
+    const colors = ['#eaf1fb','#eaf4f5','#eaf6f0','#eef6ea','#f6f3e6','#faf0e6','#f8ebea','#f6eaf1','#eeecf9','#eaf1fb','#eaf4f5'];
     const idx = mo.m-2;
-    html += `<div class="month-cell" style="width:${w}px;min-width:${w}px;background:${colors[idx]||'#1a2540'}">${mo.label}</div>`;
+    html += `<div class="month-cell" style="width:${w}px;min-width:${w}px;background:${colors[idx]||'#eaf1fb'}">${mo.label}</div>`;
   });
   html += `</div>`;
 
@@ -1611,8 +1619,8 @@ function renderGantt(){
       const dt = new Date(2026,mo.m-1,day);
       const dow = dt.getDay();
       let color = 'var(--text3)';
-      if(dow===0) color='#ff5252';
-      else if(dow===6) color='#64b5f6';
+      if(dow===0) color='#c62828';
+      else if(dow===6) color='#1565c0';
       html += `<div class="day-cell" style="width:${w}px;min-width:${w}px;color:${color}">${day===1||day===5||day===10||day===15||day===20||day===25?day:''}</div>`;
     }
   });
@@ -1626,7 +1634,7 @@ function renderGantt(){
   filtered.sort((a,b)=>a.start-b.start);
 
   filtered.forEach(t=>{
-    const color = GRADE_COLOR[t.grade]||'#7e8da8';
+    const color = GRADE_COLOR[t.grade]||'#52597a';
     const s = dayOffset(t.start);
     const e = dayOffset(t.end) + 1;
     const barLeft = s * DAY_W;
@@ -1636,7 +1644,7 @@ function renderGantt(){
     const expiredCls = expired ? ' is-expired-row' : '';
     const enteredBadge = t.entered ? '<span class="entered-badge">エントリー済</span>' : '';
     const checkedAttr = t.entered ? 'checked' : '';
-    const barGlow = t.entered ? ';box-shadow:0 0 6px '+color+';outline:1px solid #4caf50;' : '';
+    const barGlow = t.entered ? ';box-shadow:0 0 6px '+color+';outline:1px solid #2e7d32;' : '';
 
     // ===== 締切バッジ（大会名の下に日付・残り日数をテキスト表示）=====
     let deadlineBadge;
@@ -1645,13 +1653,13 @@ function renderGantt(){
       const dl0 = new Date(t.deadline); dl0.setHours(0,0,0,0);
       const daysLeft = Math.round((dl0-today0)/86400000);
       const dlStr = (dl0.getMonth()+1)+'/'+dl0.getDate();
-      let bg = '#545e78', fg = '#e8ecf4';
-      if(daysLeft >= 0 && daysLeft <= 7){ bg = 'var(--deadline)'; fg = '#000'; }
-      else if(daysLeft > 7 && daysLeft <= 14){ bg = '#ffb300'; fg = '#000'; }
+      let bg = '#e8ecf3', fg = '#3d4459';
+      if(daysLeft >= 0 && daysLeft <= 7){ bg = 'var(--deadline)'; fg = '#fff'; }
+      else if(daysLeft > 7 && daysLeft <= 14){ bg = '#f9a825'; fg = '#000'; }
       const daysLabel = daysLeft < 0 ? '(終了)' : daysLeft === 0 ? '(本日締切)' : '(あと'+daysLeft+'日)';
-      deadlineBadge = '<span style="display:inline-block;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700;background:'+bg+';color:'+fg+'">締切 '+dlStr+' '+daysLabel+'</span>';
+      deadlineBadge = '<span style="display:inline-block;padding:2px 7px;border-radius:3px;font-size:12px;font-weight:700;background:'+bg+';color:'+fg+'">締切 '+dlStr+' '+daysLabel+'</span>';
     } else {
-      deadlineBadge = '<span style="display:inline-block;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700;background:transparent;border:1px dashed var(--text3);color:var(--text3)">締切未定</span>';
+      deadlineBadge = '<span style="display:inline-block;padding:2px 7px;border-radius:3px;font-size:12px;font-weight:700;background:transparent;border:1px dashed var(--text3);color:var(--text3)">締切未定</span>';
     }
 
     // ===== 締切マーカー =====
@@ -1713,53 +1721,53 @@ function renderGantt(){
 
     const rowBg = getMonthBands();
 
-    html += '<div class="gantt-row'+enteredCls+expiredCls+'" data-id="'+t.id+'" style="height:60px">';
+    html += '<div class="gantt-row'+enteredCls+expiredCls+'" data-id="'+t.id+'" style="height:78px">';
 
     // チェックボックス列
-    html += '<div class="gantt-check-col" style="height:60px">';
+    html += '<div class="gantt-check-col" style="height:78px">';
     html += '<input type="checkbox" class="entry-check" '+checkedAttr+' onchange="toggleEntryCheck('+t.id+',this)" title="エントリーチェック">';
     html += '</div>';
 
     // 大会名列
-    html += '<div class="gantt-row-label" onclick="selectEntry('+t.id+')" title="'+t.name.replace(/"/g,'&quot;')+'" style="height:60px;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:4px 8px;white-space:normal;line-height:1.3">';
-    html += '<div style="font-size:10px;color:var(--text);font-weight:500;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+t.name+enteredBadge+'</div>';
+    html += '<div class="gantt-row-label" onclick="selectEntry('+t.id+')" title="'+t.name.replace(/"/g,'&quot;')+'" style="height:78px;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:6px 10px;white-space:normal;line-height:1.3">';
+    html += '<div style="font-size:14px;color:var(--text);font-weight:500;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+t.name+enteredBadge+'</div>';
     html += '<div>'+deadlineBadge+'</div>';
     html += '</div>';
 
     // グレード列
-    html += '<div class="gantt-row-grade" style="color:'+color+';height:60px;flex-direction:column;gap:2px">';
+    html += '<div class="gantt-row-grade" style="color:'+color+';height:78px;flex-direction:column;gap:2px">';
     html += '<span>'+t.grade+'</span>';
     html += '</div>';
 
     // タイムライン列 - 3行構造
-    html += '<div class="gantt-row-timeline" style="width:'+totalW+'px;height:60px;display:flex;flex-direction:column">';
+    html += '<div class="gantt-row-timeline" style="width:'+totalW+'px;height:78px;display:flex;flex-direction:column">';
 
-    // 行1: 大会期間バー + 締切マーカー（高さ20px）
-    html += '<div style="position:relative;height:20px;flex-shrink:0">';
+    // 行1: 大会期間バー + 締切マーカー（高さ26px）
+    html += '<div style="position:relative;height:26px;flex-shrink:0">';
     html += rowBg;
-    html += '<div style="position:absolute;left:'+barLeft+'px;width:'+barW+'px;height:10px;top:5px;background:'+color+';border-radius:3px;opacity:0.5'+barGlow+'" onmousemove="showTip(event,'+t.id+')" onmouseleave="hideTip()" style="cursor:pointer"></div>';
+    html += '<div style="position:absolute;left:'+barLeft+'px;width:'+barW+'px;height:15px;top:6px;background:'+color+';border-radius:3px;opacity:0.8'+barGlow+'" onmousemove="showTip(event,'+t.id+')" onmouseleave="hideTip()" style="cursor:pointer"></div>';
     html += dlMarker;
     html += '</div>';
 
-    // 行2: 予選バー（高さ20px）
-    html += '<div style="position:relative;height:20px;flex-shrink:0;border-top:1px solid rgba(255,255,255,0.04)">';
+    // 行2: 予選バー（高さ26px）
+    html += '<div style="position:relative;height:26px;flex-shrink:0;border-top:1px solid rgba(0,0,0,0.06)">';
     html += rowBg;
     if(yosenBar){
       html += yosenBar;
     } else {
       // 予選未入力ならラベル
-      html += '<div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:8px;color:var(--text3)">予選</div>';
+      html += '<div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3)">予選</div>';
     }
     html += '</div>';
 
-    // 行3: 本戦バー + 予備日（高さ20px）
-    html += '<div style="position:relative;height:20px;flex-shrink:0;border-top:1px solid rgba(255,255,255,0.04)">';
+    // 行3: 本戦バー + 予備日（高さ26px）
+    html += '<div style="position:relative;height:26px;flex-shrink:0;border-top:1px solid rgba(0,0,0,0.06)">';
     html += rowBg;
     if(honsenBar){
       html += honsenBar;
       html += yobiDot;
     } else {
-      html += '<div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:8px;color:var(--text3)">本戦</div>';
+      html += '<div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3)">本戦</div>';
     }
     html += '</div>';
 
@@ -1775,9 +1783,9 @@ function renderGantt(){
   const todayPos = dayOffset(today)*DAY_W;
   const totalWpx = TOTAL_DAYS*DAY_W;
   if(todayPos>0&&todayPos<totalWpx){
-    container.querySelectorAll('.gantt-row-timeline > div').forEach(r=>{
+    container.querySelectorAll('.gantt-row-timeline > div').forEach((r,i)=>{
       const tl = document.createElement('div');
-      tl.className='today-line';
+      tl.className='today-line'+(i%3===0?' with-label':'');
       tl.style.left=todayPos+'px';
       r.appendChild(tl);
     });
@@ -1818,9 +1826,9 @@ function showTip(e,id){
   const t = tournaments.find(x=>x.id===id);
   if(!t) return;
   const tip = document.getElementById('tooltip');
-  const color = GRADE_COLOR[t.grade]||'#7e8da8';
+  const color = GRADE_COLOR[t.grade]||'#52597a';
   const fmt = dt => dt?`${dt.getMonth()+1}/${dt.getDate()}`:'未入力';
-  const memoRow = t.memo ? '<div class="tooltip-row"><span class="tooltip-key">メモ</span><span class="tooltip-val" style="font-size:10px">'+t.memo+'</span></div>' : '';
+  const memoRow = t.memo ? '<div class="tooltip-row"><span class="tooltip-key">メモ</span><span class="tooltip-val" style="font-size:13px">'+t.memo+'</span></div>' : '';
   tip.innerHTML = `
     <div class="tooltip-name">${t.name}</div>
     <div class="tooltip-row"><span class="tooltip-key">グレード</span><span class="tooltip-badge" style="background:${color}">${t.grade}</span></div>
@@ -1829,7 +1837,7 @@ function showTip(e,id){
     <div class="tooltip-row"><span class="tooltip-key">予選</span><span class="tooltip-val" style="color:${t.yosenStart?'var(--yosen)':'var(--text3)'}">${t.yosenStart?fmt(t.yosenStart)+' 〜 '+fmt(t.yosenEnd):'未入力'}</span></div>
     <div class="tooltip-row"><span class="tooltip-key">本戦</span><span class="tooltip-val" style="color:${t.honsenStart?'var(--honsen)':'var(--text3)'}">${t.honsenStart?fmt(t.honsenStart)+' 〜 '+fmt(t.honsenEnd):'未入力'}</span></div>
     <div class="tooltip-row"><span class="tooltip-key">予備日</span><span class="tooltip-val">${fmt(t.yobi)}</span></div>
-    <div class="tooltip-row"><span class="tooltip-key">対象</span><span class="tooltip-val" style="font-size:10px">U${t.ages.join('/U')} / ${t.genders.join('・')} / ${t.sds.join(',')}</span></div>
+    <div class="tooltip-row"><span class="tooltip-key">対象</span><span class="tooltip-val" style="font-size:13px">U${t.ages.join('/U')} / ${t.genders.join('・')} / ${t.sds.join(',')}</span></div>
     ${memoRow}
   `;
   tip.style.display='block';
@@ -1859,18 +1867,18 @@ function updateEntryList(){
   const list = document.getElementById('entryList');
   const filtered = tournaments.filter(t=>t.name.toLowerCase().includes(q)).slice(0,60);
   list.innerHTML = filtered.map(t=>{
-    const color=GRADE_COLOR[t.grade]||'#7e8da8';
+    const color=GRADE_COLOR[t.grade]||'#5c6bc0';
     const hasDL = t.deadline||t.yosenStart||t.honsenStart;
-    const enteredStyle = t.entered ? 'border-color:#4caf50;background:rgba(76,175,80,0.08)' : '';
+    const enteredStyle = t.entered ? 'border-color:#2e7d32;background:rgba(46,125,50,0.08)' : '';
     return `<div class="entry-item${currentEntryId===t.id?' selected':''}" onclick="selectEntry(${t.id})" style="${enteredStyle}">
-      <div style="display:flex;align-items:center;gap:6px">
+      <div style="display:flex;align-items:center;gap:8px">
         <input type="checkbox" class="entry-check" ${t.entered?'checked':''} onclick="event.stopPropagation()" onchange="toggleEntryCheck(${t.id},this)" style="flex-shrink:0">
         <div>
-          <div class="entry-item-name">${t.name}${t.entered?'<span style="display:inline-block;background:#4caf50;color:#000;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;margin-left:4px">エントリー済</span>':''}</div>
+          <div class="entry-item-name">${t.name}${t.entered?'<span style="display:inline-block;background:#2e7d32;color:#fff;font-size:12px;font-weight:700;padding:2px 6px;border-radius:3px;margin-left:4px">エントリー済</span>':''}</div>
           <div class="entry-item-meta">
             <span style="color:${color};font-weight:700">${t.grade}</span>
             &nbsp;${t.start.getMonth()+1}/${t.start.getDate()}〜${t.end.getMonth()+1}/${t.end.getDate()}
-            ${hasDL?'&nbsp;<span style="color:#66bb6a;font-size:9px">✓詳細入力済</span>':''}
+            ${hasDL?'&nbsp;<span style="color:#2e7d32;font-size:12px">✓詳細入力済</span>':''}
           </div>
         </div>
       </div>
@@ -1990,15 +1998,15 @@ function updateConflicts(){
       const dt = new Date(d);
       return (dt.getMonth()+1)+'/'+(dt.getDate());
     }).join('、');
-    const colorA = GRADE_COLOR[c.a.grade]||'#7e8da8';
-    const colorB = GRADE_COLOR[c.b.grade]||'#7e8da8';
+    const colorA = GRADE_COLOR[c.a.grade]||'#52597a';
+    const colorB = GRADE_COLOR[c.b.grade]||'#52597a';
     return '<div class="de-warning">' +
       '<div class="de-warning-title">⚠ 本戦日が重複しています</div>' +
       '<div class="de-warning-names">' +
       '<span style="color:'+colorA+';font-weight:700">['+c.a.grade+']</span> '+c.a.name+'<br>' +
       '<span style="color:'+colorB+';font-weight:700">['+c.b.grade+']</span> '+c.b.name +
       '</div>' +
-      '<div style="margin-top:5px;color:#ff4081;font-size:10px">重複日: '+overlapStr+'</div>' +
+      '<div style="margin-top:5px;color:var(--deadline);font-size:13px;font-weight:700">重複日: '+overlapStr+'</div>' +
       '</div>';
   }).join('');
 }
@@ -2008,7 +2016,7 @@ function updateURLs(){
   const div = document.getElementById('urlList');
   const withUrl = tournaments.filter(t=>t.url||t.customUrl);
   div.innerHTML = withUrl.map(t=>{
-    const color=GRADE_COLOR[t.grade]||'#7e8da8';
+    const color=GRADE_COLOR[t.grade]||'#52597a';
     const url=t.customUrl||t.url;
     return `<div class="url-item">
       <div class="url-name">${t.name}<span class="url-grade" style="background:${color}">${t.grade}</span></div>
@@ -2148,11 +2156,11 @@ function updateCustomTournamentList(){
   const div = document.getElementById('customTournamentList');
   if(!div) return;
   if(customTournaments.length===0){
-    div.innerHTML='<div style="font-size:10px;color:var(--text3);text-align:center;padding:12px 0">まだ追加した大会はありません</div>';
+    div.innerHTML='<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px 0">まだ追加した大会はありません</div>';
     return;
   }
   div.innerHTML = customTournaments.map(ct=>{
-    const color = GRADE_COLOR[ct.grade]||'#7e8da8';
+    const color = GRADE_COLOR[ct.grade]||'#52597a';
     const sm = ct.start.getMonth()+1, sd = ct.start.getDate();
     const em = ct.end.getMonth()+1, ed = ct.end.getDate();
     return '<div class="custom-tournament-item">' +
@@ -2161,7 +2169,7 @@ function updateCustomTournamentList(){
         '<div class="custom-tournament-meta">' +
           '<span style="color:'+color+';font-weight:700">'+ct.grade+'</span>' +
           '　'+sm+'/'+sd+'〜'+em+'/'+ed +
-          (ct.url ? '　<a href="'+ct.url+'" target="_blank" style="color:var(--accent);font-size:9px">URL</a>' : '') +
+          (ct.url ? '　<a href="'+ct.url+'" target="_blank" style="color:var(--accent);font-size:12px">URL</a>' : '') +
         '</div>' +
       '</div>' +
       '<button class="delete-custom-btn" onclick="deleteCustomTournament('+ct.id+')">×</button>' +
