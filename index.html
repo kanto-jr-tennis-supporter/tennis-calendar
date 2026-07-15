@@ -811,15 +811,32 @@ select.filter-select option { background: var(--surface2); }
   color: var(--text3);
   border-color: var(--border);
 }
+.more-toggle-btn { display: none; }
 
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {
   /* ヘッダー */
-  .header { padding: 10px 12px 8px; }
-  .header-top { flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .header { padding: 8px 12px 6px; }
+  .header-top { flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
   .header-title { font-size: 21px; }
   .header-year { font-size: 13px; }
   .warn-toggle-btn { font-size: 12px; padding: 5px 10px; }
+  .more-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  /* 印刷/PDF・カレンダー出力・バックアップ・復元は「⋯ その他」を開いた時だけ表示 */
+  .header-top .header-more-btn { display: none; }
+  .header-top.more-open .header-more-btn { display: inline-flex; }
   .reset-btn { font-size: 12px; padding: 5px 10px; }
 
   /* フィルター：折りたたみ式 */
@@ -973,17 +990,18 @@ select.filter-select option { background: var(--surface2); }
 <body class="mv-gantt">
 
 <div class="header">
-  <div class="header-top">
+  <div class="header-top" id="headerTop">
     <div>
       <div class="header-year">KANTO JUNIOR TENNIS</div>
       <div class="header-title">大会カレンダー <span>2026</span></div>
     </div>
     <button class="reset-btn" onclick="resetFilters()">リセット</button>
     <button class="warn-toggle-btn" id="warnToggleBtn" onclick="toggleWarnMode()">⚠ ダブルエントリー警告 ON</button>
-    <button class="toggle-expired" onclick="printSchedule()" title="表示中の大会を印刷用リストで開く（PDF保存も可）">🖨 印刷/PDF</button>
-    <button class="toggle-expired" onclick="exportICS()" title="エントリー済み大会をカレンダーアプリ用ファイルで書き出す">📅 カレンダー出力</button>
-    <button class="toggle-expired" onclick="exportData()" title="入力済みデータをファイルに保存（他の端末への引き継ぎ・バックアップ用）">📤 バックアップ</button>
-    <button class="toggle-expired" onclick="document.getElementById('importFileInput').click()" title="バックアップファイルを読み込んで復元">📥 復元</button>
+    <button class="more-toggle-btn" id="moreToggleBtn" onclick="toggleMoreMenu()">⋯ その他</button>
+    <button class="toggle-expired header-more-btn" onclick="printSchedule()" title="表示中の大会を印刷用リストで開く（PDF保存も可）">🖨 印刷/PDF</button>
+    <button class="toggle-expired header-more-btn" onclick="exportICS()" title="エントリー済み大会をカレンダーアプリ用ファイルで書き出す">📅 カレンダー出力</button>
+    <button class="toggle-expired header-more-btn" onclick="exportData()" title="入力済みデータをファイルに保存（他の端末への引き継ぎ・バックアップ用）">📤 バックアップ</button>
+    <button class="toggle-expired header-more-btn" onclick="document.getElementById('importFileInput').click()" title="バックアップファイルを読み込んで復元">📥 復元</button>
     <input type="file" id="importFileInput" accept="application/json" style="display:none" onchange="importData(this.files[0])">
   </div>
   <button class="filter-toggle-btn" id="filterToggleBtn" onclick="toggleFilterPanel()">
@@ -1902,6 +1920,11 @@ function toggleFilterPanel(){
   const panel = document.getElementById('filtersPanel');
   const collapsed = panel.classList.toggle('collapsed');
   document.getElementById('filterToggleChevron').textContent = collapsed ? '▾' : '▴';
+}
+// スマホ：印刷/PDF・カレンダー出力・バックアップ・復元を「⋯ その他」に畳む
+function toggleMoreMenu(){
+  const open = document.getElementById('headerTop').classList.toggle('more-open');
+  document.getElementById('moreToggleBtn').textContent = open ? '⋯ 閉じる' : '⋯ その他';
 }
 function updateFilterActiveCount(){
   const n = selectedAges.length + (selectedGender?1:0) + selectedSDs.length + selectedGrades.length + (selectedMonth>0?1:0);
