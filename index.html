@@ -42,7 +42,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
-@media (min-width: 769px) {
+@media (min-width: 1367px) {
   body { height: 100vh; overflow-y: hidden; display: flex; flex-direction: column; }
 }
 
@@ -186,7 +186,7 @@ select.filter-select option { background: var(--surface2); }
   grid-template-columns: 1fr 360px;
   min-height: 500px;
 }
-@media (min-width: 769px) {
+@media (min-width: 1367px) {
   .main { flex: 1; min-height: 0; }
 }
 
@@ -815,7 +815,7 @@ select.filter-select option { background: var(--surface2); }
 .mobile-header-tools { display: none; }
 
 /* ===== MOBILE RESPONSIVE ===== */
-@media (max-width: 768px) {
+@media (max-width: 1366px) {
   /* ヘッダー */
   .header { padding: 8px 12px 6px; }
   .header-top { flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
@@ -2187,7 +2187,7 @@ function renderGantt(){
   container.innerHTML = html;
   // sticky列（チェック・大会名・グレード）が横スクロール中も正しく固定されるよう、
   // コンテナ自身の幅を実際のタイムライン幅に合わせて明示的に広げる
-  const fixedColsW = window.innerWidth < 768 ? (34+130+38) : (42+300+52);
+  const fixedColsW = window.innerWidth < 1367 ? (34+130+38) : (42+300+52);
   container.style.width = (fixedColsW + totalW) + 'px';
 
   // today line - inject into each sub-row div
@@ -2205,7 +2205,7 @@ function renderGantt(){
 
   // Auto-scroll to today（スマホでは水平スクロールのみ）
   const wrap = document.getElementById('ganttWrap');
-  const scrollTarget = Math.max(0, todayPos - (window.innerWidth < 768 ? 60 : 100));
+  const scrollTarget = Math.max(0, todayPos - (window.innerWidth < 1367 ? 60 : 100));
   wrap.scrollLeft = scrollTarget;
 
   updateEntryList();
