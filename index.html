@@ -858,16 +858,19 @@ select.filter-select option { background: var(--surface2); }
   .count-num { font-size: 19px; }
   .legend-inline { display: none; }
 
-  /* メインレイアウト：縦並び */
-  .main { display: flex; flex-direction: column; height: auto; }
+  /* メインレイアウト：縦並び。カレンダー/ツールのどちらかがその都度
+     ほぼ全画面になるトグル方式（body.mv-gantt / body.mv-tools で切替） */
+  body { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+  .main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
-  /* ガントチャート上部 */
   .gantt-wrap {
-    height: 50vh;
-    min-height: 280px;
+    flex: 1;
+    min-height: 0;
     overflow: auto;
     border-bottom: 2px solid var(--border);
+    transition: flex-basis 0.15s;
   }
+  body.mv-tools .gantt-wrap { display: none; }
 
   /* スマホ用列幅：大会名を130pxに絞る */
   .gantt-check-col { min-width: 34px; width: 34px; }
@@ -905,9 +908,31 @@ select.filter-select option { background: var(--surface2); }
   .side-panel {
     border-left: none;
     border-top: 2px solid var(--border);
-    height: 50vh;
-    min-height: 300px;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
+  body.mv-gantt .side-content { display: none; }
+  body.mv-gantt .side-panel { flex: 0 0 auto; }
+
+  .mobile-calendar-btn {
+    display: none;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px;
+    border: none;
+    border-bottom: 2px solid var(--border);
+    background: rgba(13,106,184,0.08);
+    color: var(--accent);
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  body.mv-tools .mobile-calendar-btn { display: flex; }
 
   .side-tab { font-size: 12px; padding: 9px 4px; }
   .form-input { font-size: 13px; padding: 6px 8px; }
@@ -945,7 +970,7 @@ select.filter-select option { background: var(--surface2); }
 }
 </style>
 </head>
-<body>
+<body class="mv-gantt">
 
 <div class="header">
   <div class="header-top">
@@ -1043,6 +1068,7 @@ select.filter-select option { background: var(--surface2); }
 
   <!-- SIDE PANEL -->
   <div class="side-panel">
+    <button class="mobile-calendar-btn" onclick="setMobileView('gantt')">📅 カレンダーに戻る</button>
     <div class="side-tabs">
       <div class="side-tab active" onclick="switchTab('entry')">手入力・詳細</div>
       <div class="side-tab" onclick="switchTab('conflict')">重複チェック</div>
@@ -2190,6 +2216,13 @@ function switchTab(tab){
   if(tab==='conflict') updateConflicts();
   if(tab==='urls') updateURLs();
   if(tab==='add') updateCustomTournamentList();
+  setMobileView('tools');
+}
+
+// スマホ：カレンダー/ツールパネルのどちらかをその都度ほぼ全画面表示にする
+function setMobileView(view){
+  document.body.classList.toggle('mv-tools', view==='tools');
+  document.body.classList.toggle('mv-gantt', view==='gantt');
 }
 
 // Entry list
