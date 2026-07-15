@@ -812,6 +812,7 @@ select.filter-select option { background: var(--surface2); }
   border-color: var(--border);
 }
 .more-toggle-btn { display: none; }
+.mobile-header-tools { display: none; }
 
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {
@@ -834,7 +835,7 @@ select.filter-select option { background: var(--surface2); }
     cursor: pointer;
     font-family: 'Noto Sans JP', sans-serif;
   }
-  /* 印刷/PDF・カレンダー出力・バックアップ・復元は「⋯ その他」を開いた時だけ表示 */
+  /* 印刷/PDF・カレンダー出力・バックアップ・復元は「⋯ メニュー」を開いた時だけ表示 */
   .header-top .header-more-btn { display: none; }
   .header-top.more-open .header-more-btn { display: inline-flex; }
   .reset-btn { font-size: 12px; padding: 5px 10px; }
@@ -870,10 +871,32 @@ select.filter-select option { background: var(--surface2); }
   .filter-label { font-size: 11px; }
   .filter-btn { font-size: 13px; padding: 5px 10px; }
 
-  /* カウントバー */
-  .count-bar { padding: 6px 10px; flex-wrap: wrap; gap: 6px; }
-  .count-num { font-size: 19px; }
-  .legend-inline { display: none; }
+  /* カウントバー：大会数と終了済みトグルはガント表の角（大会名の上）に移すため非表示 */
+  .count-bar { display: none; }
+
+  .mobile-header-tools {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 3px;
+  }
+  .mobile-count-num {
+    font-weight: 800;
+    color: var(--accent);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  .mobile-toggle-expired-btn {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text3);
+    font-family: 'Noto Sans JP', sans-serif;
+    white-space: nowrap;
+  }
+  .mobile-toggle-expired-btn.active { border-color: #bf360c; color: #bf360c; }
 
   /* メインレイアウト：縦並び。カレンダー/ツールのどちらかがその都度
      ほぼ全画面になるトグル方式（body.mv-gantt / body.mv-tools で切替） */
@@ -997,7 +1020,7 @@ select.filter-select option { background: var(--surface2); }
     </div>
     <button class="reset-btn" onclick="resetFilters()">リセット</button>
     <button class="warn-toggle-btn" id="warnToggleBtn" onclick="toggleWarnMode()">⚠ ダブルエントリー警告 ON</button>
-    <button class="more-toggle-btn" id="moreToggleBtn" onclick="toggleMoreMenu()">⋯ その他</button>
+    <button class="more-toggle-btn" id="moreToggleBtn" onclick="toggleMoreMenu()">⋯ メニュー</button>
     <button class="toggle-expired header-more-btn" onclick="printSchedule()" title="表示中の大会を印刷用リストで開く（PDF保存も可）">🖨 印刷/PDF</button>
     <button class="toggle-expired header-more-btn" onclick="exportICS()" title="エントリー済み大会をカレンダーアプリ用ファイルで書き出す">📅 カレンダー出力</button>
     <button class="toggle-expired header-more-btn" onclick="exportData()" title="入力済みデータをファイルに保存（他の端末への引き継ぎ・バックアップ用）">📤 バックアップ</button>
@@ -1921,10 +1944,10 @@ function toggleFilterPanel(){
   const collapsed = panel.classList.toggle('collapsed');
   document.getElementById('filterToggleChevron').textContent = collapsed ? '▾' : '▴';
 }
-// スマホ：印刷/PDF・カレンダー出力・バックアップ・復元を「⋯ その他」に畳む
+// スマホ：印刷/PDF・カレンダー出力・バックアップ・復元を「⋯ メニュー」に畳む
 function toggleMoreMenu(){
   const open = document.getElementById('headerTop').classList.toggle('more-open');
-  document.getElementById('moreToggleBtn').textContent = open ? '⋯ 閉じる' : '⋯ その他';
+  document.getElementById('moreToggleBtn').textContent = open ? '⋯ 閉じる' : '⋯ メニュー';
 }
 function updateFilterActiveCount(){
   const n = selectedAges.length + (selectedGender?1:0) + selectedSDs.length + selectedGrades.length + (selectedMonth>0?1:0);
@@ -1971,9 +1994,17 @@ function renderGantt(){
   const container = document.getElementById('ganttContainer');
   const totalW = TOTAL_DAYS * DAY_W;
 
+  const expiredBtnCls = showExpired ? '' : ' active';
+  const expiredBtnText = showExpired ? '終了済みを隠す' : '終了済みも表示';
   let html = '<div class="gantt-header">';
   html += '<div class="gantt-check-col" style="font-size:13px;color:var(--text3);padding:6px 0;align-items:flex-end;justify-content:center;height:78px">✓</div>';
-  html += '<div class="gantt-label-col" style="display:flex;align-items:flex-end;padding:6px 10px;font-size:13px;color:var(--text3);height:78px">大会名</div>';
+  html += '<div class="gantt-label-col" style="display:flex;flex-direction:column;justify-content:flex-end;padding:6px 10px;font-size:13px;color:var(--text3);height:78px">'
+        + '<div class="mobile-header-tools">'
+        +   '<span class="mobile-count-num">'+filtered.length+'件</span>'
+        +   '<button class="mobile-toggle-expired-btn'+expiredBtnCls+'" onclick="toggleExpired()">'+expiredBtnText+'</button>'
+        + '</div>'
+        + '<span>大会名</span>'
+        + '</div>';
   html += '<div class="gantt-grade-col" style="display:flex;align-items:flex-end;justify-content:center;padding:6px 2px;font-size:13px;color:var(--text3);height:78px">G</div>';
   html += '<div class="gantt-timeline">';
 
