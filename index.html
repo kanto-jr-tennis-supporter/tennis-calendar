@@ -2198,9 +2198,10 @@ function renderGantt(){
       const checkedAttr = sc.entered ? 'checked' : '';
       const barGlow = sc.entered ? ';box-shadow:0 0 6px '+color+';outline:1px solid #2e7d32;' : '';
       const scheduleTag = multi ? '<span class="schedule-tag">U'+sc.ages.join('・U')+' / '+sc.genders.join('・')+'</span>' : '';
-      // 締切・予選・本戦・予備日のいずれも未入力なら、PDFから取り込んだ大会全体の
-      // 公式期間をそのまま表示する（編集を加えたスケジュールはそちらを優先表示）
-      const hasAnyInput = !!(sc.deadline || sc.yosenStart || (sc.yosenDates&&sc.yosenDates.length) || sc.honsenStart || (sc.honsenDates&&sc.honsenDates.length) || sc.yobi);
+      // 予選・本戦・予備日がいずれも未入力なら、PDFから取り込んだ大会全体の公式期間を
+      // そのまま表示する（締切日はPDFのデフォルト値が自動で入っていることが多く、
+      // それだけでは「編集した」扱いにしない。締切マーカーは常に重ねて表示する）
+      const hasAnyInput = !!(sc.yosenStart || (sc.yosenDates&&sc.yosenDates.length) || sc.honsenStart || (sc.honsenDates&&sc.honsenDates.length) || sc.yobi);
 
       // ===== 締切バッジ（大会名の下に日付・残り日数をテキスト表示）=====
       let deadlineBadge;
@@ -2306,7 +2307,9 @@ function renderGantt(){
       html += '<div class="gantt-row-timeline" style="width:'+totalW+'px;height:'+rowH+'px;position:relative" onmousemove="showTip(event,'+t.id+','+scIdx+')" onmouseleave="hideTip()">';
       html += rowBg;
       if(!hasAnyInput){
-        // まだ何も入力されていないスケジュールは、公式の大会期間バーを表示
+        // 予選・本戦・予備日が未入力なら、公式の大会期間バーを表示
+        // （締切日はPDFのデフォルト値が自動で入っているだけのことが多いので、
+        //  ここでは判定に使わず、マーカーとして常に重ねて表示する）
         html += '<div style="position:absolute;left:'+barLeft+'px;width:'+barW+'px;top:32px;height:20px;background:'+color+';border-radius:3px;opacity:0.8'+barGlow+'"></div>';
       } else {
         if(yosenBar){
@@ -2320,8 +2323,8 @@ function renderGantt(){
         } else {
           html += '<div style="position:absolute;left:4px;top:'+(HONSEN_TOP-2)+'px;font-size:11px;color:var(--text3)">本戦 --</div>';
         }
-        html += dlMarker;
       }
+      html += dlMarker;
       html += '</div>';
 
       html += '</div>'; // row
