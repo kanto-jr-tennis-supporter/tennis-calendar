@@ -570,6 +570,16 @@ select.filter-select option { background: var(--surface2); }
   margin-top: 6px;
   font-weight: 700;
 }
+.form-sticky-footer {
+  position: sticky;
+  bottom: -14px;
+  margin: 10px -14px -14px;
+  padding: 8px 14px 14px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 10px 10px;
+}
+.form-sticky-footer .save-btn { margin-top: 0; }
 
 /* Check conflicts */
 .conflict-section { }
@@ -1207,8 +1217,10 @@ select.filter-select option { background: var(--surface2); }
             <input class="form-input" type="text" id="inp-url" placeholder="https://...">
           </div>
 
-          <button class="save-btn" onclick="saveEntry()">保存してガントチャートに反映</button>
-          <div class="saved-badge" id="savedBadge">✓ 保存しました！</div>
+          <div class="form-sticky-footer">
+            <button class="save-btn" onclick="saveEntry()">保存してガントチャートに反映</button>
+            <div class="saved-badge" id="savedBadge">✓ 保存しました！</div>
+          </div>
         </div>
       </div>
 
@@ -1289,8 +1301,10 @@ select.filter-select option { background: var(--surface2); }
             <input class="form-input" type="date" id="add-honsen-end">
           </div>
 
-          <button class="save-btn" style="margin-top:10px" onclick="addCustomTournament()">ガントチャートに追加</button>
-          <div class="saved-badge" id="addBadge">✓ 追加しました！</div>
+          <div class="form-sticky-footer">
+            <button class="save-btn" onclick="addCustomTournament()">ガントチャートに追加</button>
+            <div class="saved-badge" id="addBadge">✓ 追加しました！</div>
+          </div>
         </div>
 
         <!-- 追加済み大会一覧 -->
