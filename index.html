@@ -2274,37 +2274,45 @@ function renderGantt(){
         }
       }
 
-      html += '<div class="gantt-row'+enteredCls+expiredCls+'" data-id="'+t.id+'" data-sched="'+scIdx+'" style="height:78px">';
+      // 複数スケジュールに分かれている大会は、どの年代にも共通で編集できない
+      // 「大会全体の公式期間」バーを省略する（年代ごとに重複表示されて紛らわしいため）。
+      // その分、締切マーカーは予選の行に表示する。
+      const rowH = multi ? 52 : 78;
+
+      html += '<div class="gantt-row'+enteredCls+expiredCls+'" data-id="'+t.id+'" data-sched="'+scIdx+'" style="height:'+rowH+'px">';
 
       // チェックボックス列
-      html += '<div class="gantt-check-col" style="height:78px">';
+      html += '<div class="gantt-check-col" style="height:'+rowH+'px">';
       html += '<input type="checkbox" class="entry-check" '+checkedAttr+' onchange="toggleEntryCheck('+t.id+','+scIdx+',this)" title="エントリーチェック">';
       html += '</div>';
 
       // 大会名列
-      html += '<div class="gantt-row-label" onclick="selectEntry('+t.id+','+scIdx+')" title="'+t.name.replace(/"/g,'&quot;')+'" style="height:78px;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:6px 10px;white-space:normal;line-height:1.3">';
+      html += '<div class="gantt-row-label" onclick="selectEntry('+t.id+','+scIdx+')" title="'+t.name.replace(/"/g,'&quot;')+'" style="height:'+rowH+'px;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:6px 10px;white-space:normal;line-height:1.3">';
       html += '<div style="font-size:14px;color:var(--text);font-weight:500;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+t.name+enteredBadge+scheduleTag+'</div>';
       html += '<div>'+deadlineBadge+honsenPendingBadge+'</div>';
       html += '</div>';
 
       // グレード列
-      html += '<div class="gantt-row-grade" style="color:'+color+';height:78px;flex-direction:column;gap:2px">';
+      html += '<div class="gantt-row-grade" style="color:'+color+';height:'+rowH+'px;flex-direction:column;gap:2px">';
       html += '<span>'+t.grade+'</span>';
       html += '</div>';
 
-      // タイムライン列 - 3行構造
-      html += '<div class="gantt-row-timeline" style="width:'+totalW+'px;height:78px;display:flex;flex-direction:column">';
+      // タイムライン列
+      html += '<div class="gantt-row-timeline" style="width:'+totalW+'px;height:'+rowH+'px;display:flex;flex-direction:column">';
 
-      // 行1: 大会期間バー + 締切マーカー（高さ26px）
-      html += '<div style="position:relative;height:26px;flex-shrink:0">';
-      html += rowBg;
-      html += '<div style="position:absolute;left:'+barLeft+'px;width:'+barW+'px;height:15px;top:6px;background:'+color+';border-radius:3px;opacity:0.8'+barGlow+'" onmousemove="showTip(event,'+t.id+','+scIdx+')" onmouseleave="hideTip()" style="cursor:pointer"></div>';
-      html += dlMarker;
-      html += '</div>';
+      if(!multi){
+        // 行1: 大会期間バー + 締切マーカー（高さ26px）※単一スケジュールの大会のみ表示
+        html += '<div style="position:relative;height:26px;flex-shrink:0">';
+        html += rowBg;
+        html += '<div style="position:absolute;left:'+barLeft+'px;width:'+barW+'px;height:15px;top:6px;background:'+color+';border-radius:3px;opacity:0.8'+barGlow+'" onmousemove="showTip(event,'+t.id+','+scIdx+')" onmouseleave="hideTip()" style="cursor:pointer"></div>';
+        html += dlMarker;
+        html += '</div>';
+      }
 
-      // 行2: 予選バー（高さ26px）
-      html += '<div style="position:relative;height:26px;flex-shrink:0;border-top:1px solid rgba(0,0,0,0.06)">';
+      // 行2: 予選バー（高さ26px）※複数スケジュールの場合はここに締切マーカーも表示
+      html += '<div style="position:relative;height:26px;flex-shrink:0'+(multi?'':';border-top:1px solid rgba(0,0,0,0.06)')+'"'+(multi?' onmousemove="showTip(event,'+t.id+','+scIdx+')" onmouseleave="hideTip()"':'')+'>';
       html += rowBg;
+      if(multi) html += dlMarker;
       if(yosenBar){
         html += yosenBar;
       } else {
@@ -2314,7 +2322,7 @@ function renderGantt(){
       html += '</div>';
 
       // 行3: 本戦バー + 予備日（高さ26px）
-      html += '<div style="position:relative;height:26px;flex-shrink:0;border-top:1px solid rgba(0,0,0,0.06)">';
+      html += '<div style="position:relative;height:26px;flex-shrink:0;border-top:1px solid rgba(0,0,0,0.06)"'+(multi?' onmousemove="showTip(event,'+t.id+','+scIdx+')" onmouseleave="hideTip()"':'')+'>';
       html += rowBg;
       if(honsenBar){
         html += honsenBar;
@@ -2341,11 +2349,15 @@ function renderGantt(){
   const todayPos = dayOffset(today)*DAY_W;
   const totalWpx = TOTAL_DAYS*DAY_W;
   if(todayPos>0&&todayPos<totalWpx){
-    container.querySelectorAll('.gantt-row-timeline > div').forEach((r,i)=>{
-      const tl = document.createElement('div');
-      tl.className='today-line'+(i%3===0?' with-label':'');
-      tl.style.left=todayPos+'px';
-      r.appendChild(tl);
+    // 複数スケジュールの大会は行によってサブ行の数（2 or 3）が違うため、
+    // グローバルなインデックスではなく各タイムライン内での位置で「TODAY」ラベルを判定する
+    container.querySelectorAll('.gantt-row-timeline').forEach(timeline=>{
+      Array.from(timeline.children).forEach((r,i)=>{
+        const tl = document.createElement('div');
+        tl.className='today-line'+(i===0?' with-label':'');
+        tl.style.left=todayPos+'px';
+        r.appendChild(tl);
+      });
     });
   }
 
