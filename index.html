@@ -1937,16 +1937,12 @@ function toggleExpired(){
 }
 
 function isExpired(t){
+  // 「終了済み」は大会そのものが終わったかどうかで判定する（締切日はここでは見ない。
+  // 締切が過ぎているだけでまだ開催されていない大会まで隠れる/グレーになってしまうため）
   const today = new Date(); today.setHours(0,0,0,0);
-  if(t.entered){
-    const lastDay = t.honsenEnd || t.yosenEnd || t.end;
-    if(!lastDay) return false;
-    return lastDay < today;
-  }
-  // deadline未入力の場合はendで判断、endもなければ非表示にしない
-  const expireDate = t.deadline || t.end;
-  if(!expireDate) return false;
-  return expireDate < today;
+  const lastDay = t.honsenEnd || t.yosenEnd || t.end;
+  if(!lastDay) return false;
+  return lastDay < today;
 }
 
 // スマホ：絞り込みエリアの折りたたみ
