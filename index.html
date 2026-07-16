@@ -2183,10 +2183,6 @@ function renderGantt(){
 
   filtered.forEach(t=>{
     const color = GRADE_COLOR[t.grade]||'#52597a';
-    const s = dayOffset(t.start);
-    const e = dayOffset(t.end) + 1;
-    const barLeft = s * DAY_W;
-    const barW = Math.max(3,(e-s)*DAY_W);
     const expired = isExpired(t);
     const expiredCls = expired ? ' is-expired-row' : '';
     const rowBg = getMonthBands();
@@ -2198,7 +2194,6 @@ function renderGantt(){
       const hasHonsen = (sc.honsenDates && sc.honsenDates.length > 0) || !!sc.honsenStart;
       const honsenPendingBadge = (sc.entered && !hasHonsen) ? '<span class="honsen-pending-badge">⏳ 本戦日 入力待ち</span>' : '';
       const checkedAttr = sc.entered ? 'checked' : '';
-      const barGlow = sc.entered ? ';box-shadow:0 0 6px '+color+';outline:1px solid #2e7d32;' : '';
       const scheduleTag = multi ? '<span class="schedule-tag">U'+sc.ages.join('・U')+' / '+sc.genders.join('・')+'</span>' : '';
 
       // ===== 締切バッジ（大会名の下に日付・残り日数をテキスト表示）=====
@@ -2217,13 +2212,18 @@ function renderGantt(){
         deadlineBadge = '<span style="display:inline-block;padding:2px 7px;border-radius:3px;font-size:12px;font-weight:700;background:transparent;border:1px dashed var(--text3);color:var(--text3)">締切未定</span>';
       }
 
+      // 締切・予選・本戦・予備日を1つの帯（高さ64px）にまとめて表示するための
+      // 縦位置。締切マーカーは帯全体を貫く縦線、予選・本戦はそれぞれ薄い帯として重ねる。
+      const YOSEN_TOP = 30, YOSEN_H = 14, YOSEN_DOT_TOP = 33;
+      const HONSEN_TOP = 48, HONSEN_H = 14, HONSEN_DOT_TOP = 51;
+
       // ===== 締切マーカー =====
       let dlMarker = '';
       if(sc.deadline){
         const pos = dayOffset(sc.deadline)*DAY_W;
         if(pos>=0&&pos<=totalW){
-          dlMarker = '<div style="position:absolute;left:'+pos+'px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:var(--deadline);border:2px solid #fff;border-radius:50%;z-index:4;margin-left:-5px;box-shadow:0 0 4px rgba(0,0,0,0.6)" title="締切"></div>';
-          dlMarker += '<div style="position:absolute;left:'+pos+'px;top:0;bottom:0;width:2px;background:var(--deadline);opacity:0.7;z-index:3"></div>';
+          dlMarker = '<div style="position:absolute;left:'+pos+'px;top:6px;width:10px;height:10px;background:var(--deadline);border:2px solid #fff;border-radius:50%;z-index:4;margin-left:-5px;box-shadow:0 0 4px rgba(0,0,0,0.6)" title="締切"></div>';
+          dlMarker += '<div style="position:absolute;left:'+pos+'px;top:4px;bottom:4px;width:2px;background:var(--deadline);opacity:0.7;z-index:3"></div>';
         }
       }
 
@@ -2235,15 +2235,15 @@ function renderGantt(){
           if(!dateStr) return;
           const pos = dayOffset(new Date(dateStr))*DAY_W;
           if(pos>=0&&pos<=totalW){
-            yosenBar += '<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--yosen);border-radius:50%;z-index:3"></div>';
+            yosenBar += '<div style="position:absolute;left:'+(pos-4)+'px;top:'+YOSEN_DOT_TOP+'px;width:8px;height:8px;background:var(--yosen);border-radius:50%;z-index:3"></div>';
           }
         });
       } else if(sc.yosenStart && sc.yosenEnd){
         const ys=dayOffset(sc.yosenStart)*DAY_W, ye=(dayOffset(sc.yosenEnd)+1)*DAY_W;
-        yosenBar='<div style="position:absolute;left:'+ys+'px;width:'+(ye-ys)+'px;height:100%;background:var(--yosen);opacity:0.85;border-radius:2px;z-index:2"></div>';
+        yosenBar='<div style="position:absolute;left:'+ys+'px;width:'+(ye-ys)+'px;top:'+YOSEN_TOP+'px;height:'+YOSEN_H+'px;background:var(--yosen);opacity:0.85;border-radius:2px;z-index:2"></div>';
       } else if(sc.yosenStart){
         const pos=dayOffset(sc.yosenStart)*DAY_W;
-        yosenBar='<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--yosen);border-radius:50%;z-index:3"></div>';
+        yosenBar='<div style="position:absolute;left:'+(pos-4)+'px;top:'+YOSEN_DOT_TOP+'px;width:8px;height:8px;background:var(--yosen);border-radius:50%;z-index:3"></div>';
       }
 
       // ===== 本戦バー（範囲 or 飛び飛びドット）=====
@@ -2254,15 +2254,15 @@ function renderGantt(){
           if(!dateStr) return;
           const pos = dayOffset(new Date(dateStr))*DAY_W;
           if(pos>=0&&pos<=totalW){
-            honsenBar += '<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--honsen);border-radius:50%;z-index:3"></div>';
+            honsenBar += '<div style="position:absolute;left:'+(pos-4)+'px;top:'+HONSEN_DOT_TOP+'px;width:8px;height:8px;background:var(--honsen);border-radius:50%;z-index:3"></div>';
           }
         });
       } else if(sc.honsenStart && sc.honsenEnd){
         const hs=dayOffset(sc.honsenStart)*DAY_W, he=(dayOffset(sc.honsenEnd)+1)*DAY_W;
-        honsenBar='<div style="position:absolute;left:'+hs+'px;width:'+(he-hs)+'px;height:100%;background:var(--honsen);opacity:0.85;border-radius:2px;z-index:2"></div>';
+        honsenBar='<div style="position:absolute;left:'+hs+'px;width:'+(he-hs)+'px;top:'+HONSEN_TOP+'px;height:'+HONSEN_H+'px;background:var(--honsen);opacity:0.85;border-radius:2px;z-index:2"></div>';
       } else if(sc.honsenStart){
         const pos=dayOffset(sc.honsenStart)*DAY_W;
-        honsenBar='<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--honsen);border-radius:50%;z-index:3"></div>';
+        honsenBar='<div style="position:absolute;left:'+(pos-4)+'px;top:'+HONSEN_DOT_TOP+'px;width:8px;height:8px;background:var(--honsen);border-radius:50%;z-index:3"></div>';
       }
 
       // ===== 予備日ドット =====
@@ -2270,14 +2270,13 @@ function renderGantt(){
       if(sc.yobi){
         const pos=dayOffset(sc.yobi)*DAY_W;
         if(pos>=0&&pos<=totalW){
-          yobiDot='<div style="position:absolute;left:'+(pos-3)+'px;top:50%;transform:translateY(-50%);width:6px;height:6px;background:var(--yobi);border-radius:50%;z-index:3;opacity:0.8"></div>';
+          yobiDot='<div style="position:absolute;left:'+(pos-3)+'px;top:64px;width:6px;height:6px;background:var(--yobi);border-radius:50%;z-index:3;opacity:0.8"></div>';
         }
       }
 
-      // 複数スケジュールに分かれている大会は、どの年代にも共通で編集できない
-      // 「大会全体の公式期間」バーを省略する（年代ごとに重複表示されて紛らわしいため）。
-      // その分、締切マーカーは予選の行に表示する。
-      const rowH = multi ? 52 : 78;
+      // 締切・予選・本戦・予備日を1行にまとめて表示する（大会全体の公式期間バーは
+      // 編集できず年代ごとに重複してしまうため表示しない。詳細はホバーで確認できる）
+      const rowH = 78;
 
       html += '<div class="gantt-row'+enteredCls+expiredCls+'" data-id="'+t.id+'" data-sched="'+scIdx+'" style="height:'+rowH+'px">';
 
@@ -2297,42 +2296,23 @@ function renderGantt(){
       html += '<span>'+t.grade+'</span>';
       html += '</div>';
 
-      // タイムライン列
-      html += '<div class="gantt-row-timeline" style="width:'+totalW+'px;height:'+rowH+'px;display:flex;flex-direction:column">';
-
-      if(!multi){
-        // 行1: 大会期間バー + 締切マーカー（高さ26px）※単一スケジュールの大会のみ表示
-        html += '<div style="position:relative;height:26px;flex-shrink:0">';
-        html += rowBg;
-        html += '<div style="position:absolute;left:'+barLeft+'px;width:'+barW+'px;height:15px;top:6px;background:'+color+';border-radius:3px;opacity:0.8'+barGlow+'" onmousemove="showTip(event,'+t.id+','+scIdx+')" onmouseleave="hideTip()" style="cursor:pointer"></div>';
-        html += dlMarker;
-        html += '</div>';
-      }
-
-      // 行2: 予選バー（高さ26px）※複数スケジュールの場合はここに締切マーカーも表示
-      html += '<div style="position:relative;height:26px;flex-shrink:0'+(multi?'':';border-top:1px solid rgba(0,0,0,0.06)')+'"'+(multi?' onmousemove="showTip(event,'+t.id+','+scIdx+')" onmouseleave="hideTip()"':'')+'>';
+      // タイムライン列 - 締切・予選・本戦・予備日を1つの帯にまとめる
+      html += '<div class="gantt-row-timeline" style="width:'+totalW+'px;height:'+rowH+'px;position:relative" onmousemove="showTip(event,'+t.id+','+scIdx+')" onmouseleave="hideTip()">';
       html += rowBg;
-      if(multi) html += dlMarker;
       if(yosenBar){
         html += yosenBar;
       } else {
-        // 予選未入力ならラベル
-        html += '<div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3)">予選</div>';
+        html += '<div style="position:absolute;left:4px;top:'+(YOSEN_TOP-2)+'px;font-size:11px;color:var(--text3)">予選 --</div>';
       }
-      html += '</div>';
-
-      // 行3: 本戦バー + 予備日（高さ26px）
-      html += '<div style="position:relative;height:26px;flex-shrink:0;border-top:1px solid rgba(0,0,0,0.06)"'+(multi?' onmousemove="showTip(event,'+t.id+','+scIdx+')" onmouseleave="hideTip()"':'')+'>';
-      html += rowBg;
       if(honsenBar){
         html += honsenBar;
         html += yobiDot;
       } else {
-        html += '<div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3)">本戦</div>';
+        html += '<div style="position:absolute;left:4px;top:'+(HONSEN_TOP-2)+'px;font-size:11px;color:var(--text3)">本戦 --</div>';
       }
+      html += dlMarker;
       html += '</div>';
 
-      html += '</div>'; // timeline
       html += '</div>'; // row
     }); // schedules
   });
@@ -2344,20 +2324,16 @@ function renderGantt(){
   const fixedColsW = window.innerWidth < 1367 ? (34+130+38) : (42+300+52);
   container.style.width = (fixedColsW + totalW) + 'px';
 
-  // today line - inject into each sub-row div
+  // today line - 各行のタイムライン帯（1行にまとめた締切/予選/本戦/予備日の帯）に直接差し込む
   const today = new Date();
   const todayPos = dayOffset(today)*DAY_W;
   const totalWpx = TOTAL_DAYS*DAY_W;
   if(todayPos>0&&todayPos<totalWpx){
-    // 複数スケジュールの大会は行によってサブ行の数（2 or 3）が違うため、
-    // グローバルなインデックスではなく各タイムライン内での位置で「TODAY」ラベルを判定する
     container.querySelectorAll('.gantt-row-timeline').forEach(timeline=>{
-      Array.from(timeline.children).forEach((r,i)=>{
-        const tl = document.createElement('div');
-        tl.className='today-line'+(i===0?' with-label':'');
-        tl.style.left=todayPos+'px';
-        r.appendChild(tl);
-      });
+      const tl = document.createElement('div');
+      tl.className='today-line with-label';
+      tl.style.left=todayPos+'px';
+      timeline.appendChild(tl);
     });
   }
 
