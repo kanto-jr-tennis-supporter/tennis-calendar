@@ -520,6 +520,47 @@ select.filter-select option { background: var(--surface2); }
   border-bottom: 1px solid var(--border);
   line-height: 1.4;
 }
+.schedule-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.schedule-tab {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.schedule-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.schedule-tab-add { border-style: dashed; color: var(--accent); border-color: var(--accent); background: transparent; }
+.schedule-tab-add.active { background: var(--accent); color: #fff; border-style: solid; }
+.schedule-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  margin-left: 6px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.delete-schedule-btn {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid var(--deadline);
+  color: var(--deadline);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.delete-schedule-btn:hover { background: var(--deadline); color: #fff; }
 .form-row {
   display: flex;
   align-items: center;
@@ -1147,6 +1188,15 @@ select.filter-select option { background: var(--surface2); }
         <div class="entry-form" id="entryForm">
           <div class="entry-form-title" id="entryFormTitle"></div>
 
+          <div class="schedule-tabs" id="scheduleTabs"></div>
+
+          <!-- 対象年代・性別 -->
+          <div class="form-section-label">
+            <div class="form-marker-dot" style="background:var(--accent)"></div>
+            対象年代・性別（このスケジュールの対象）
+          </div>
+          <div style="margin-bottom:10px" id="entryAgeGenderRow"></div>
+
           <!-- 締切日 -->
           <div class="form-section-label">
             <div class="form-marker-dot" style="background:var(--deadline)"></div>
@@ -1218,6 +1268,9 @@ select.filter-select option { background: var(--surface2); }
           </div>
 
           <div class="form-sticky-footer">
+            <div id="deleteScheduleRow" style="display:none;margin-bottom:6px">
+              <button class="delete-schedule-btn" onclick="deleteCurrentSchedule()">🗑 このスケジュールを削除</button>
+            </div>
             <button class="save-btn" onclick="saveEntry()">保存してガントチャートに反映</button>
             <div class="saved-badge" id="savedBadge">✓ 保存しました！</div>
           </div>
@@ -1743,19 +1796,31 @@ const RAW = [
 ["神奈川県ジュニアテニス選手権大会 G4Dの部","G4D",3,31,3,31,"18,16,14,12","男,女","S","http://www.kanagawa-tennis.jp/junior_kanagawajr.html",2027,2027],
 ]
 
-const tournaments = RAW.map((r,i) => ({
-  id: i,
-  name: r[0], grade: r[1],
-  start: d(r[2],r[3],r[10]||2026), end: d(r[4],r[5],r[11]||2026),
-  ages: r[6].split(',').map(Number),
-  genders: r[7].split(','),
-  sds: r[8].split(','),
-  url: r[9],
-  deadline: null,
-  yosenStart: null, yosenEnd: null, yosenDates: [],
-  honsenStart: null, honsenEnd: null, honsenDates: [],
-  yobi: null, memo: '', customUrl: '', entered: false
-}));
+// 1大会につき1つ以上の「スケジュール」を持つ。通常は1つ（対象年代・性別は大会の全範囲）。
+// 年代・性別によって予選/本戦の日程が異なる場合、スケジュールを複数追加できる。
+function makeBlankSchedule(ages, genders){
+  return {
+    ages: ages.slice(), genders: genders.slice(),
+    deadline: null,
+    yosenStart: null, yosenEnd: null, yosenDates: [],
+    honsenStart: null, honsenEnd: null, honsenDates: [],
+    yobi: null, memo: '', customUrl: '', entered: false
+  };
+}
+
+const tournaments = RAW.map((r,i) => {
+  const ages = r[6].split(',').map(Number);
+  const genders = r[7].split(',');
+  return {
+    id: i,
+    name: r[0], grade: r[1],
+    start: d(r[2],r[3],r[10]||2026), end: d(r[4],r[5],r[11]||2026),
+    ages, genders,
+    sds: r[8].split(','),
+    url: r[9],
+    schedules: [makeBlankSchedule(ages, genders)]
+  };
+});
 
 // Load saved data
 function loadSaved() {
@@ -1763,17 +1828,29 @@ function loadSaved() {
     const s = localStorage.getItem('jt2026');
     if (s) {
       const saved = JSON.parse(s);
+      const toDate = v => v ? new Date(v) : null;
       saved.forEach(sv => {
         const t = tournaments.find(x => x.id === sv.id);
-        if (t) {
-          ['deadline','yosenStart','yosenEnd','honsenStart','honsenEnd','yobi'].forEach(k => {
-            t[k] = sv[k] ? new Date(sv[k]) : null;
-          });
-          t.yosenDates = sv.yosenDates || [];
-          t.honsenDates = sv.honsenDates || [];
-          t.memo = sv.memo || '';
-          t.customUrl = sv.customUrl || '';
-          t.entered = sv.entered || false;
+        if (!t) return;
+        if (Array.isArray(sv.schedules)) {
+          t.schedules = sv.schedules.map(sc => ({
+            ages: sc.ages || t.ages.slice(),
+            genders: sc.genders || t.genders.slice(),
+            deadline: toDate(sc.deadline),
+            yosenStart: toDate(sc.yosenStart), yosenEnd: toDate(sc.yosenEnd), yosenDates: sc.yosenDates || [],
+            honsenStart: toDate(sc.honsenStart), honsenEnd: toDate(sc.honsenEnd), honsenDates: sc.honsenDates || [],
+            yobi: toDate(sc.yobi), memo: sc.memo || '', customUrl: sc.customUrl || '', entered: sc.entered || false
+          }));
+          if (t.schedules.length === 0) t.schedules = [makeBlankSchedule(t.ages, t.genders)];
+        } else {
+          // 旧形式（大会につきスケジュール1つを直接保存）からの移行
+          t.schedules = [{
+            ages: t.ages.slice(), genders: t.genders.slice(),
+            deadline: toDate(sv.deadline),
+            yosenStart: toDate(sv.yosenStart), yosenEnd: toDate(sv.yosenEnd), yosenDates: sv.yosenDates || [],
+            honsenStart: toDate(sv.honsenStart), honsenEnd: toDate(sv.honsenEnd), honsenDates: sv.honsenDates || [],
+            yobi: toDate(sv.yobi), memo: sv.memo || '', customUrl: sv.customUrl || '', entered: sv.entered || false
+          }];
         }
       });
     }
@@ -1783,16 +1860,19 @@ function loadSaved() {
 function saveToDB() {
   const data = tournaments.map(t => ({
     id: t.id,
-    deadline: t.deadline ? t.deadline.toISOString() : null,
-    yosenStart: t.yosenStart ? t.yosenStart.toISOString() : null,
-    yosenEnd: t.yosenEnd ? t.yosenEnd.toISOString() : null,
-    yosenDates: t.yosenDates || [],
-    honsenStart: t.honsenStart ? t.honsenStart.toISOString() : null,
-    honsenEnd: t.honsenEnd ? t.honsenEnd.toISOString() : null,
-    honsenDates: t.honsenDates || [],
-    yobi: t.yobi ? t.yobi.toISOString() : null,
-    memo: t.memo, customUrl: t.customUrl,
-    entered: t.entered || false
+    schedules: t.schedules.map(sc => ({
+      ages: sc.ages, genders: sc.genders,
+      deadline: sc.deadline ? sc.deadline.toISOString() : null,
+      yosenStart: sc.yosenStart ? sc.yosenStart.toISOString() : null,
+      yosenEnd: sc.yosenEnd ? sc.yosenEnd.toISOString() : null,
+      yosenDates: sc.yosenDates || [],
+      honsenStart: sc.honsenStart ? sc.honsenStart.toISOString() : null,
+      honsenEnd: sc.honsenEnd ? sc.honsenEnd.toISOString() : null,
+      honsenDates: sc.honsenDates || [],
+      yobi: sc.yobi ? sc.yobi.toISOString() : null,
+      memo: sc.memo, customUrl: sc.customUrl,
+      entered: sc.entered || false
+    }))
   }));
   try { localStorage.setItem('jt2026', JSON.stringify(data)); } catch(e) {}
 }
@@ -1923,21 +2003,21 @@ function updatePickedDate(type, idx, val){
 }
 
 // 本戦の日付セットを返す（判定用）
-function getHonsenDates(t){
+function getHonsenDates(sc){
   const dates = new Set();
-  if(t.honsenDates && t.honsenDates.length > 0){
+  if(sc.honsenDates && sc.honsenDates.length > 0){
     // 飛び飛びモード
-    t.honsenDates.forEach(d => { if(d) dates.add(d); });
-  } else if(t.honsenStart && t.honsenEnd){
+    sc.honsenDates.forEach(d => { if(d) dates.add(d); });
+  } else if(sc.honsenStart && sc.honsenEnd){
     // 範囲モード
-    let cur = new Date(t.honsenStart);
-    const end = new Date(t.honsenEnd);
+    let cur = new Date(sc.honsenStart);
+    const end = new Date(sc.honsenEnd);
     while(cur <= end){
       dates.add(cur.toISOString().slice(0,10));
       cur.setDate(cur.getDate()+1);
     }
-  } else if(t.honsenStart){
-    dates.add(t.honsenStart.toISOString().slice(0,10));
+  } else if(sc.honsenStart){
+    dates.add(sc.honsenStart.toISOString().slice(0,10));
   }
   return dates;
 }
@@ -1953,8 +2033,14 @@ function toggleExpired(){
 function isExpired(t){
   // 「終了済み」は大会そのものが終わったかどうかで判定する（締切日はここでは見ない。
   // 締切が過ぎているだけでまだ開催されていない大会まで隠れる/グレーになってしまうため）
+  // 複数スケジュールがある場合は、一番遅い本戦/予選終了日を基準にする
   const today = new Date(); today.setHours(0,0,0,0);
-  const lastDay = t.honsenEnd || t.yosenEnd || t.end;
+  let lastDay = null;
+  (t.schedules||[]).forEach(sc=>{
+    const dd = sc.honsenEnd || sc.yosenEnd;
+    if(dd && (!lastDay || dd > lastDay)) lastDay = dd;
+  });
+  if(!lastDay) lastDay = t.end;
   if(!lastDay) return false;
   return lastDay < today;
 }
@@ -2069,141 +2155,145 @@ function renderGantt(){
     const barLeft = s * DAY_W;
     const barW = Math.max(3,(e-s)*DAY_W);
     const expired = isExpired(t);
-    const enteredCls = t.entered ? ' is-entered' : '';
     const expiredCls = expired ? ' is-expired-row' : '';
-    const enteredBadge = t.entered ? '<span class="entered-badge">エントリー済</span>' : '';
-    const hasHonsen = (t.honsenDates && t.honsenDates.length > 0) || !!t.honsenStart;
-    const honsenPendingBadge = (t.entered && !hasHonsen) ? '<span class="honsen-pending-badge">⏳ 本戦日 入力待ち</span>' : '';
-    const checkedAttr = t.entered ? 'checked' : '';
-    const barGlow = t.entered ? ';box-shadow:0 0 6px '+color+';outline:1px solid #2e7d32;' : '';
-
-    // ===== 締切バッジ（大会名の下に日付・残り日数をテキスト表示）=====
-    let deadlineBadge;
-    if(t.deadline){
-      const today0 = new Date(); today0.setHours(0,0,0,0);
-      const dl0 = new Date(t.deadline); dl0.setHours(0,0,0,0);
-      const daysLeft = Math.round((dl0-today0)/86400000);
-      const dlStr = (dl0.getMonth()+1)+'/'+dl0.getDate();
-      let bg = '#e8ecf3', fg = '#3d4459';
-      if(daysLeft >= 0 && daysLeft <= 7){ bg = 'var(--deadline)'; fg = '#fff'; }
-      else if(daysLeft > 7 && daysLeft <= 14){ bg = '#f9a825'; fg = '#000'; }
-      const daysLabel = daysLeft < 0 ? '(終了)' : daysLeft === 0 ? '(本日締切)' : '(あと'+daysLeft+'日)';
-      deadlineBadge = '<span style="display:inline-block;padding:2px 7px;border-radius:3px;font-size:12px;font-weight:700;background:'+bg+';color:'+fg+'">締切 '+dlStr+' '+daysLabel+'</span>';
-    } else {
-      deadlineBadge = '<span style="display:inline-block;padding:2px 7px;border-radius:3px;font-size:12px;font-weight:700;background:transparent;border:1px dashed var(--text3);color:var(--text3)">締切未定</span>';
-    }
-
-    // ===== 締切マーカー =====
-    let dlMarker = '';
-    if(t.deadline){
-      const pos = dayOffset(t.deadline)*DAY_W;
-      if(pos>=0&&pos<=totalW){
-        dlMarker = '<div style="position:absolute;left:'+pos+'px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:var(--deadline);border:2px solid #fff;border-radius:50%;z-index:4;margin-left:-5px;box-shadow:0 0 4px rgba(0,0,0,0.6)" title="締切"></div>';
-        dlMarker += '<div style="position:absolute;left:'+pos+'px;top:0;bottom:0;width:2px;background:var(--deadline);opacity:0.7;z-index:3"></div>';
-      }
-    }
-
-    // ===== 予選バー（範囲 or 飛び飛びドット）=====
-    let yosenBar = '';
-    if(t.yosenDates && t.yosenDates.length > 0){
-      // 飛び飛びモード → ドット
-      t.yosenDates.forEach(dateStr=>{
-        if(!dateStr) return;
-        const pos = dayOffset(new Date(dateStr))*DAY_W;
-        if(pos>=0&&pos<=totalW){
-          yosenBar += '<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--yosen);border-radius:50%;z-index:3"></div>';
-        }
-      });
-    } else if(t.yosenStart && t.yosenEnd){
-      const ys=dayOffset(t.yosenStart)*DAY_W, ye=(dayOffset(t.yosenEnd)+1)*DAY_W;
-      yosenBar='<div style="position:absolute;left:'+ys+'px;width:'+(ye-ys)+'px;height:100%;background:var(--yosen);opacity:0.85;border-radius:2px;z-index:2"></div>';
-    } else if(t.yosenStart){
-      const pos=dayOffset(t.yosenStart)*DAY_W;
-      yosenBar='<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--yosen);border-radius:50%;z-index:3"></div>';
-    }
-
-    // ===== 本戦バー（範囲 or 飛び飛びドット）=====
-    let honsenBar = '';
-    if(t.honsenDates && t.honsenDates.length > 0){
-      // 飛び飛びモード → ドット
-      t.honsenDates.forEach(dateStr=>{
-        if(!dateStr) return;
-        const pos = dayOffset(new Date(dateStr))*DAY_W;
-        if(pos>=0&&pos<=totalW){
-          honsenBar += '<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--honsen);border-radius:50%;z-index:3"></div>';
-        }
-      });
-    } else if(t.honsenStart && t.honsenEnd){
-      const hs=dayOffset(t.honsenStart)*DAY_W, he=(dayOffset(t.honsenEnd)+1)*DAY_W;
-      honsenBar='<div style="position:absolute;left:'+hs+'px;width:'+(he-hs)+'px;height:100%;background:var(--honsen);opacity:0.85;border-radius:2px;z-index:2"></div>';
-    } else if(t.honsenStart){
-      const pos=dayOffset(t.honsenStart)*DAY_W;
-      honsenBar='<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--honsen);border-radius:50%;z-index:3"></div>';
-    }
-
-    // ===== 予備日ドット =====
-    let yobiDot = '';
-    if(t.yobi){
-      const pos=dayOffset(t.yobi)*DAY_W;
-      if(pos>=0&&pos<=totalW){
-        yobiDot='<div style="position:absolute;left:'+(pos-3)+'px;top:50%;transform:translateY(-50%);width:6px;height:6px;background:var(--yobi);border-radius:50%;z-index:3;opacity:0.8"></div>';
-      }
-    }
-
     const rowBg = getMonthBands();
+    const multi = t.schedules.length > 1;
 
-    html += '<div class="gantt-row'+enteredCls+expiredCls+'" data-id="'+t.id+'" style="height:78px">';
+    t.schedules.forEach((sc, scIdx) => {
+      const enteredCls = sc.entered ? ' is-entered' : '';
+      const enteredBadge = sc.entered ? '<span class="entered-badge">エントリー済</span>' : '';
+      const hasHonsen = (sc.honsenDates && sc.honsenDates.length > 0) || !!sc.honsenStart;
+      const honsenPendingBadge = (sc.entered && !hasHonsen) ? '<span class="honsen-pending-badge">⏳ 本戦日 入力待ち</span>' : '';
+      const checkedAttr = sc.entered ? 'checked' : '';
+      const barGlow = sc.entered ? ';box-shadow:0 0 6px '+color+';outline:1px solid #2e7d32;' : '';
+      const scheduleTag = multi ? '<span class="schedule-tag">U'+sc.ages.join('・U')+' / '+sc.genders.join('・')+'</span>' : '';
 
-    // チェックボックス列
-    html += '<div class="gantt-check-col" style="height:78px">';
-    html += '<input type="checkbox" class="entry-check" '+checkedAttr+' onchange="toggleEntryCheck('+t.id+',this)" title="エントリーチェック">';
-    html += '</div>';
+      // ===== 締切バッジ（大会名の下に日付・残り日数をテキスト表示）=====
+      let deadlineBadge;
+      if(sc.deadline){
+        const today0 = new Date(); today0.setHours(0,0,0,0);
+        const dl0 = new Date(sc.deadline); dl0.setHours(0,0,0,0);
+        const daysLeft = Math.round((dl0-today0)/86400000);
+        const dlStr = (dl0.getMonth()+1)+'/'+dl0.getDate();
+        let bg = '#e8ecf3', fg = '#3d4459';
+        if(daysLeft >= 0 && daysLeft <= 7){ bg = 'var(--deadline)'; fg = '#fff'; }
+        else if(daysLeft > 7 && daysLeft <= 14){ bg = '#f9a825'; fg = '#000'; }
+        const daysLabel = daysLeft < 0 ? '(終了)' : daysLeft === 0 ? '(本日締切)' : '(あと'+daysLeft+'日)';
+        deadlineBadge = '<span style="display:inline-block;padding:2px 7px;border-radius:3px;font-size:12px;font-weight:700;background:'+bg+';color:'+fg+'">締切 '+dlStr+' '+daysLabel+'</span>';
+      } else {
+        deadlineBadge = '<span style="display:inline-block;padding:2px 7px;border-radius:3px;font-size:12px;font-weight:700;background:transparent;border:1px dashed var(--text3);color:var(--text3)">締切未定</span>';
+      }
 
-    // 大会名列
-    html += '<div class="gantt-row-label" onclick="selectEntry('+t.id+')" title="'+t.name.replace(/"/g,'&quot;')+'" style="height:78px;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:6px 10px;white-space:normal;line-height:1.3">';
-    html += '<div style="font-size:14px;color:var(--text);font-weight:500;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+t.name+enteredBadge+'</div>';
-    html += '<div>'+deadlineBadge+honsenPendingBadge+'</div>';
-    html += '</div>';
+      // ===== 締切マーカー =====
+      let dlMarker = '';
+      if(sc.deadline){
+        const pos = dayOffset(sc.deadline)*DAY_W;
+        if(pos>=0&&pos<=totalW){
+          dlMarker = '<div style="position:absolute;left:'+pos+'px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:var(--deadline);border:2px solid #fff;border-radius:50%;z-index:4;margin-left:-5px;box-shadow:0 0 4px rgba(0,0,0,0.6)" title="締切"></div>';
+          dlMarker += '<div style="position:absolute;left:'+pos+'px;top:0;bottom:0;width:2px;background:var(--deadline);opacity:0.7;z-index:3"></div>';
+        }
+      }
 
-    // グレード列
-    html += '<div class="gantt-row-grade" style="color:'+color+';height:78px;flex-direction:column;gap:2px">';
-    html += '<span>'+t.grade+'</span>';
-    html += '</div>';
+      // ===== 予選バー（範囲 or 飛び飛びドット）=====
+      let yosenBar = '';
+      if(sc.yosenDates && sc.yosenDates.length > 0){
+        // 飛び飛びモード → ドット
+        sc.yosenDates.forEach(dateStr=>{
+          if(!dateStr) return;
+          const pos = dayOffset(new Date(dateStr))*DAY_W;
+          if(pos>=0&&pos<=totalW){
+            yosenBar += '<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--yosen);border-radius:50%;z-index:3"></div>';
+          }
+        });
+      } else if(sc.yosenStart && sc.yosenEnd){
+        const ys=dayOffset(sc.yosenStart)*DAY_W, ye=(dayOffset(sc.yosenEnd)+1)*DAY_W;
+        yosenBar='<div style="position:absolute;left:'+ys+'px;width:'+(ye-ys)+'px;height:100%;background:var(--yosen);opacity:0.85;border-radius:2px;z-index:2"></div>';
+      } else if(sc.yosenStart){
+        const pos=dayOffset(sc.yosenStart)*DAY_W;
+        yosenBar='<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--yosen);border-radius:50%;z-index:3"></div>';
+      }
 
-    // タイムライン列 - 3行構造
-    html += '<div class="gantt-row-timeline" style="width:'+totalW+'px;height:78px;display:flex;flex-direction:column">';
+      // ===== 本戦バー（範囲 or 飛び飛びドット）=====
+      let honsenBar = '';
+      if(sc.honsenDates && sc.honsenDates.length > 0){
+        // 飛び飛びモード → ドット
+        sc.honsenDates.forEach(dateStr=>{
+          if(!dateStr) return;
+          const pos = dayOffset(new Date(dateStr))*DAY_W;
+          if(pos>=0&&pos<=totalW){
+            honsenBar += '<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--honsen);border-radius:50%;z-index:3"></div>';
+          }
+        });
+      } else if(sc.honsenStart && sc.honsenEnd){
+        const hs=dayOffset(sc.honsenStart)*DAY_W, he=(dayOffset(sc.honsenEnd)+1)*DAY_W;
+        honsenBar='<div style="position:absolute;left:'+hs+'px;width:'+(he-hs)+'px;height:100%;background:var(--honsen);opacity:0.85;border-radius:2px;z-index:2"></div>';
+      } else if(sc.honsenStart){
+        const pos=dayOffset(sc.honsenStart)*DAY_W;
+        honsenBar='<div style="position:absolute;left:'+(pos-4)+'px;top:50%;transform:translateY(-50%);width:8px;height:8px;background:var(--honsen);border-radius:50%;z-index:3"></div>';
+      }
 
-    // 行1: 大会期間バー + 締切マーカー（高さ26px）
-    html += '<div style="position:relative;height:26px;flex-shrink:0">';
-    html += rowBg;
-    html += '<div style="position:absolute;left:'+barLeft+'px;width:'+barW+'px;height:15px;top:6px;background:'+color+';border-radius:3px;opacity:0.8'+barGlow+'" onmousemove="showTip(event,'+t.id+')" onmouseleave="hideTip()" style="cursor:pointer"></div>';
-    html += dlMarker;
-    html += '</div>';
+      // ===== 予備日ドット =====
+      let yobiDot = '';
+      if(sc.yobi){
+        const pos=dayOffset(sc.yobi)*DAY_W;
+        if(pos>=0&&pos<=totalW){
+          yobiDot='<div style="position:absolute;left:'+(pos-3)+'px;top:50%;transform:translateY(-50%);width:6px;height:6px;background:var(--yobi);border-radius:50%;z-index:3;opacity:0.8"></div>';
+        }
+      }
 
-    // 行2: 予選バー（高さ26px）
-    html += '<div style="position:relative;height:26px;flex-shrink:0;border-top:1px solid rgba(0,0,0,0.06)">';
-    html += rowBg;
-    if(yosenBar){
-      html += yosenBar;
-    } else {
-      // 予選未入力ならラベル
-      html += '<div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3)">予選</div>';
-    }
-    html += '</div>';
+      html += '<div class="gantt-row'+enteredCls+expiredCls+'" data-id="'+t.id+'" data-sched="'+scIdx+'" style="height:78px">';
 
-    // 行3: 本戦バー + 予備日（高さ26px）
-    html += '<div style="position:relative;height:26px;flex-shrink:0;border-top:1px solid rgba(0,0,0,0.06)">';
-    html += rowBg;
-    if(honsenBar){
-      html += honsenBar;
-      html += yobiDot;
-    } else {
-      html += '<div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3)">本戦</div>';
-    }
-    html += '</div>';
+      // チェックボックス列
+      html += '<div class="gantt-check-col" style="height:78px">';
+      html += '<input type="checkbox" class="entry-check" '+checkedAttr+' onchange="toggleEntryCheck('+t.id+','+scIdx+',this)" title="エントリーチェック">';
+      html += '</div>';
 
-    html += '</div>'; // timeline
-    html += '</div>'; // row
+      // 大会名列
+      html += '<div class="gantt-row-label" onclick="selectEntry('+t.id+','+scIdx+')" title="'+t.name.replace(/"/g,'&quot;')+'" style="height:78px;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:6px 10px;white-space:normal;line-height:1.3">';
+      html += '<div style="font-size:14px;color:var(--text);font-weight:500;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+t.name+enteredBadge+scheduleTag+'</div>';
+      html += '<div>'+deadlineBadge+honsenPendingBadge+'</div>';
+      html += '</div>';
+
+      // グレード列
+      html += '<div class="gantt-row-grade" style="color:'+color+';height:78px;flex-direction:column;gap:2px">';
+      html += '<span>'+t.grade+'</span>';
+      html += '</div>';
+
+      // タイムライン列 - 3行構造
+      html += '<div class="gantt-row-timeline" style="width:'+totalW+'px;height:78px;display:flex;flex-direction:column">';
+
+      // 行1: 大会期間バー + 締切マーカー（高さ26px）
+      html += '<div style="position:relative;height:26px;flex-shrink:0">';
+      html += rowBg;
+      html += '<div style="position:absolute;left:'+barLeft+'px;width:'+barW+'px;height:15px;top:6px;background:'+color+';border-radius:3px;opacity:0.8'+barGlow+'" onmousemove="showTip(event,'+t.id+','+scIdx+')" onmouseleave="hideTip()" style="cursor:pointer"></div>';
+      html += dlMarker;
+      html += '</div>';
+
+      // 行2: 予選バー（高さ26px）
+      html += '<div style="position:relative;height:26px;flex-shrink:0;border-top:1px solid rgba(0,0,0,0.06)">';
+      html += rowBg;
+      if(yosenBar){
+        html += yosenBar;
+      } else {
+        // 予選未入力ならラベル
+        html += '<div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3)">予選</div>';
+      }
+      html += '</div>';
+
+      // 行3: 本戦バー + 予備日（高さ26px）
+      html += '<div style="position:relative;height:26px;flex-shrink:0;border-top:1px solid rgba(0,0,0,0.06)">';
+      html += rowBg;
+      if(honsenBar){
+        html += honsenBar;
+        html += yobiDot;
+      } else {
+        html += '<div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3)">本戦</div>';
+      }
+      html += '</div>';
+
+      html += '</div>'; // timeline
+      html += '</div>'; // row
+    }); // schedules
   });
 
   html += `</div>`;
@@ -2235,10 +2325,10 @@ function renderGantt(){
   updateConflicts();
 }
 
-function toggleEntryCheck(id, checkbox){
+function toggleEntryCheck(id, scheduleIndex, checkbox){
   const t = tournaments.find(x=>x.id===id);
-  if(!t) return;
-  t.entered = checkbox.checked;
+  if(!t || !t.schedules[scheduleIndex]) return;
+  t.schedules[scheduleIndex].entered = checkbox.checked;
   saveToDB();
   if(t.isCustom) saveCustomTournaments();
   renderGantt();
@@ -2257,22 +2347,26 @@ function getMonthBands(){
 }
 
 // ===== TOOLTIP =====
-function showTip(e,id){
+function showTip(e,id,scheduleIndex){
   const t = tournaments.find(x=>x.id===id);
   if(!t) return;
+  const sc = t.schedules[scheduleIndex] || t.schedules[0];
   const tip = document.getElementById('tooltip');
   const color = GRADE_COLOR[t.grade]||'#52597a';
   const fmt = dt => dt?`${dt.getMonth()+1}/${dt.getDate()}`:'未入力';
-  const memoRow = t.memo ? '<div class="tooltip-row"><span class="tooltip-key">メモ</span><span class="tooltip-val" style="font-size:13px">'+t.memo+'</span></div>' : '';
+  const memoRow = sc.memo ? '<div class="tooltip-row"><span class="tooltip-key">メモ</span><span class="tooltip-val" style="font-size:13px">'+sc.memo+'</span></div>' : '';
+  const targetLabel = t.schedules.length>1
+    ? `U${sc.ages.join('/U')} / ${sc.genders.join('・')}`
+    : `U${t.ages.join('/U')} / ${t.genders.join('・')} / ${t.sds.join(',')}`;
   tip.innerHTML = `
     <div class="tooltip-name">${t.name}</div>
     <div class="tooltip-row"><span class="tooltip-key">グレード</span><span class="tooltip-badge" style="background:${color}">${t.grade}</span></div>
     <div class="tooltip-row"><span class="tooltip-key">期間</span><span class="tooltip-val">${fmt(t.start)} 〜 ${fmt(t.end)}</span></div>
-    <div class="tooltip-row"><span class="tooltip-key">締切日</span><span class="tooltip-val" style="color:${t.deadline?'var(--deadline)':'var(--text3)'}">${fmt(t.deadline)}</span></div>
-    <div class="tooltip-row"><span class="tooltip-key">予選</span><span class="tooltip-val" style="color:${t.yosenStart?'var(--yosen)':'var(--text3)'}">${t.yosenStart?fmt(t.yosenStart)+' 〜 '+fmt(t.yosenEnd):'未入力'}</span></div>
-    <div class="tooltip-row"><span class="tooltip-key">本戦</span><span class="tooltip-val" style="color:${t.honsenStart?'var(--honsen)':'var(--text3)'}">${t.honsenStart?fmt(t.honsenStart)+' 〜 '+fmt(t.honsenEnd):'未入力'}</span></div>
-    <div class="tooltip-row"><span class="tooltip-key">予備日</span><span class="tooltip-val">${fmt(t.yobi)}</span></div>
-    <div class="tooltip-row"><span class="tooltip-key">対象</span><span class="tooltip-val" style="font-size:13px">U${t.ages.join('/U')} / ${t.genders.join('・')} / ${t.sds.join(',')}</span></div>
+    <div class="tooltip-row"><span class="tooltip-key">締切日</span><span class="tooltip-val" style="color:${sc.deadline?'var(--deadline)':'var(--text3)'}">${fmt(sc.deadline)}</span></div>
+    <div class="tooltip-row"><span class="tooltip-key">予選</span><span class="tooltip-val" style="color:${sc.yosenStart?'var(--yosen)':'var(--text3)'}">${sc.yosenStart?fmt(sc.yosenStart)+' 〜 '+fmt(sc.yosenEnd):'未入力'}</span></div>
+    <div class="tooltip-row"><span class="tooltip-key">本戦</span><span class="tooltip-val" style="color:${sc.honsenStart?'var(--honsen)':'var(--text3)'}">${sc.honsenStart?fmt(sc.honsenStart)+' 〜 '+fmt(sc.honsenEnd):'未入力'}</span></div>
+    <div class="tooltip-row"><span class="tooltip-key">予備日</span><span class="tooltip-val">${fmt(sc.yobi)}</span></div>
+    <div class="tooltip-row"><span class="tooltip-key">対象</span><span class="tooltip-val" style="font-size:13px">${targetLabel}</span></div>
     ${memoRow}
   `;
   tip.style.display='block';
@@ -2304,25 +2398,27 @@ function setMobileView(view){
 
 // Entry list
 let currentEntryId = null;
+let currentScheduleIndex = 0;
 function updateEntryList(){
   const q = document.getElementById('entrySearch').value.toLowerCase();
   const list = document.getElementById('entryList');
   const filtered = tournaments.filter(t=>t.name.toLowerCase().includes(q)).slice(0,60);
   list.innerHTML = filtered.map(t=>{
     const color=GRADE_COLOR[t.grade]||'#5c6bc0';
-    const hasDL = t.deadline||t.yosenStart||t.honsenStart;
-    const hasHonsen = (t.honsenDates && t.honsenDates.length > 0) || !!t.honsenStart;
-    const honsenPending = t.entered && !hasHonsen;
-    const enteredStyle = t.entered ? 'border-color:#2e7d32;background:rgba(46,125,50,0.08)' : '';
+    const anyEntered = t.schedules.some(sc=>sc.entered);
+    const anyHasDetail = t.schedules.some(sc=>sc.deadline||sc.yosenStart||sc.honsenStart);
+    const anyPending = t.schedules.some(sc=>sc.entered && !((sc.honsenDates&&sc.honsenDates.length>0)||!!sc.honsenStart));
+    const enteredStyle = anyEntered ? 'border-color:#2e7d32;background:rgba(46,125,50,0.08)' : '';
+    const multiTag = t.schedules.length>1 ? '<span class="schedule-tag">'+t.schedules.length+'スケジュール</span>' : '';
     return `<div class="entry-item${currentEntryId===t.id?' selected':''}" onclick="selectEntry(${t.id})" style="${enteredStyle}">
       <div style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" class="entry-check" ${t.entered?'checked':''} onclick="event.stopPropagation()" onchange="toggleEntryCheck(${t.id},this)" style="flex-shrink:0">
+        <input type="checkbox" class="entry-check" ${anyEntered?'checked':''} onclick="event.stopPropagation()" onchange="toggleEntryCheck(${t.id},0,this)" style="flex-shrink:0">
         <div>
-          <div class="entry-item-name">${t.name}${t.entered?'<span style="display:inline-block;background:#2e7d32;color:#fff;font-size:12px;font-weight:700;padding:2px 6px;border-radius:3px;margin-left:4px">エントリー済</span>':''}${honsenPending?'<span class="honsen-pending-badge">⏳ 本戦日 入力待ち</span>':''}</div>
+          <div class="entry-item-name">${t.name}${anyEntered?'<span style="display:inline-block;background:#2e7d32;color:#fff;font-size:12px;font-weight:700;padding:2px 6px;border-radius:3px;margin-left:4px">エントリー済</span>':''}${anyPending?'<span class="honsen-pending-badge">⏳ 本戦日 入力待ち</span>':''}${multiTag}</div>
           <div class="entry-item-meta">
             <span style="color:${color};font-weight:700">${t.grade}</span>
             &nbsp;${t.start.getMonth()+1}/${t.start.getDate()}〜${t.end.getMonth()+1}/${t.end.getDate()}
-            ${hasDL?'&nbsp;<span style="color:#2e7d32;font-size:12px">✓詳細入力済</span>':''}
+            ${anyHasDetail?'&nbsp;<span style="color:#2e7d32;font-size:12px">✓詳細入力済</span>':''}
           </div>
         </div>
       </div>
@@ -2331,33 +2427,69 @@ function updateEntryList(){
 }
 function filterEntryList(){ updateEntryList(); }
 
-function selectEntry(id){
+function renderScheduleTabs(t){
+  const div = document.getElementById('scheduleTabs');
+  let html = t.schedules.map((sc,i)=>{
+    const label = 'U'+sc.ages.join('・U')+' / '+sc.genders.join('・');
+    return '<button class="schedule-tab'+(i===currentScheduleIndex?' active':'')+'" onclick="selectEntry('+t.id+','+i+')">'+label+'</button>';
+  }).join('');
+  html += '<button class="schedule-tab schedule-tab-add'+(currentScheduleIndex>=t.schedules.length?' active':'')+'" onclick="selectEntry('+t.id+','+t.schedules.length+')">＋ 別の年代・性別を追加</button>';
+  div.innerHTML = html;
+}
+
+function renderAgeGenderCheckboxes(t, sc){
+  const div = document.getElementById('entryAgeGenderRow');
+  const checkedAges = sc ? sc.ages : [];
+  const checkedGenders = sc ? sc.genders : [];
+  let html = '<div style="display:flex;flex-wrap:wrap;gap:4px">';
+  t.ages.forEach(a=>{
+    html += '<label class="add-age-label"><input type="checkbox" value="'+a+'" class="entry-age-cb" '+(checkedAges.includes(a)?'checked':'')+'> U'+a+'</label>';
+  });
+  t.genders.forEach(g=>{
+    html += '<label class="add-age-label"><input type="checkbox" value="'+g+'" class="entry-gender-cb" '+(checkedGenders.includes(g)?'checked':'')+'> '+g+'</label>';
+  });
+  html += '</div>';
+  div.innerHTML = html;
+}
+
+function selectEntry(id, scheduleIndex){
   currentEntryId = id;
   const t = tournaments.find(x=>x.id===id);
   if(!t) return;
+  if(scheduleIndex===undefined || scheduleIndex===null) scheduleIndex = 0;
+  currentScheduleIndex = scheduleIndex;
+  const isNew = scheduleIndex >= t.schedules.length;
+  const sc = isNew ? null : t.schedules[scheduleIndex];
+
   switchTab('entry');
   document.getElementById('entryFormTitle').textContent = t.name;
+  renderScheduleTabs(t);
+  renderAgeGenderCheckboxes(t, sc);
   const toVal = dt => dt ? dt.toISOString().slice(0,10) : '';
 
   // 締切・予備日
-  document.getElementById('inp-deadline').value = toVal(t.deadline);
-  document.getElementById('inp-yobi').value = toVal(t.yobi);
-  document.getElementById('inp-memo').value = t.memo||'';
-  document.getElementById('inp-url').value = t.customUrl||t.url||'';
+  document.getElementById('inp-deadline').value = toVal(sc?sc.deadline:null);
+  document.getElementById('inp-yobi').value = toVal(sc?sc.yobi:null);
+  document.getElementById('inp-memo').value = sc ? (sc.memo||'') : '';
+  document.getElementById('inp-url').value = sc ? (sc.customUrl||t.url||'') : (t.url||'');
 
   // 予選モード復元
-  const yosenMode = (t.yosenDates && t.yosenDates.length > 0) ? 'pick' : 'range';
-  pickedDates.yosen = t.yosenDates ? [...t.yosenDates] : [];
+  const yosenDates = sc && sc.yosenDates ? sc.yosenDates : [];
+  const yosenMode = yosenDates.length > 0 ? 'pick' : 'range';
+  pickedDates.yosen = [...yosenDates];
   setMode('yosen', yosenMode);
-  document.getElementById('inp-yosen-start').value = toVal(t.yosenStart);
-  document.getElementById('inp-yosen-end').value = toVal(t.yosenEnd);
+  document.getElementById('inp-yosen-start').value = toVal(sc?sc.yosenStart:null);
+  document.getElementById('inp-yosen-end').value = toVal(sc?sc.yosenEnd:null);
 
   // 本戦モード復元
-  const honsenMode = (t.honsenDates && t.honsenDates.length > 0) ? 'pick' : 'range';
-  pickedDates.honsen = t.honsenDates ? [...t.honsenDates] : [];
+  const honsenDates = sc && sc.honsenDates ? sc.honsenDates : [];
+  const honsenMode = honsenDates.length > 0 ? 'pick' : 'range';
+  pickedDates.honsen = [...honsenDates];
   setMode('honsen', honsenMode);
-  document.getElementById('inp-honsen-start').value = toVal(t.honsenStart);
-  document.getElementById('inp-honsen-end').value = toVal(t.honsenEnd);
+  document.getElementById('inp-honsen-start').value = toVal(sc?sc.honsenStart:null);
+  document.getElementById('inp-honsen-end').value = toVal(sc?sc.honsenEnd:null);
+
+  document.getElementById('deleteScheduleRow').style.display = (!isNew && t.schedules.length>1) ? 'block' : 'none';
 
   document.getElementById('entryForm').classList.add('visible');
   document.getElementById('savedBadge').style.display='none';
@@ -2371,31 +2503,48 @@ function saveEntry(){
   if(!t) return;
   const fromVal = v => v ? new Date(v) : null;
 
-  t.deadline = fromVal(document.getElementById('inp-deadline').value);
-  t.yobi = fromVal(document.getElementById('inp-yobi').value);
-  t.memo = document.getElementById('inp-memo').value;
-  t.customUrl = document.getElementById('inp-url').value;
+  const ages = [...document.querySelectorAll('.entry-age-cb:checked')].map(c=>+c.value);
+  const genders = [...document.querySelectorAll('.entry-gender-cb:checked')].map(c=>c.value);
+  if(ages.length===0 || genders.length===0){
+    alert('対象年代・性別を1つ以上選択してください');
+    return;
+  }
+
+  const isNew = currentScheduleIndex >= t.schedules.length;
+  const sc = isNew ? makeBlankSchedule(t.ages, t.genders) : t.schedules[currentScheduleIndex];
+
+  sc.ages = ages;
+  sc.genders = genders;
+  sc.deadline = fromVal(document.getElementById('inp-deadline').value);
+  sc.yobi = fromVal(document.getElementById('inp-yobi').value);
+  sc.memo = document.getElementById('inp-memo').value;
+  sc.customUrl = document.getElementById('inp-url').value;
 
   // 予選
   if(inputMode.yosen === 'pick'){
-    t.yosenDates = pickedDates.yosen.filter(d=>d);
-    t.yosenStart = t.yosenDates.length > 0 ? fromVal(t.yosenDates[0]) : null;
-    t.yosenEnd = t.yosenDates.length > 0 ? fromVal(t.yosenDates[t.yosenDates.length-1]) : null;
+    sc.yosenDates = pickedDates.yosen.filter(d=>d);
+    sc.yosenStart = sc.yosenDates.length > 0 ? fromVal(sc.yosenDates[0]) : null;
+    sc.yosenEnd = sc.yosenDates.length > 0 ? fromVal(sc.yosenDates[sc.yosenDates.length-1]) : null;
   } else {
-    t.yosenDates = [];
-    t.yosenStart = fromVal(document.getElementById('inp-yosen-start').value);
-    t.yosenEnd = fromVal(document.getElementById('inp-yosen-end').value);
+    sc.yosenDates = [];
+    sc.yosenStart = fromVal(document.getElementById('inp-yosen-start').value);
+    sc.yosenEnd = fromVal(document.getElementById('inp-yosen-end').value);
   }
 
   // 本戦
   if(inputMode.honsen === 'pick'){
-    t.honsenDates = pickedDates.honsen.filter(d=>d);
-    t.honsenStart = t.honsenDates.length > 0 ? fromVal(t.honsenDates[0]) : null;
-    t.honsenEnd = t.honsenDates.length > 0 ? fromVal(t.honsenDates[t.honsenDates.length-1]) : null;
+    sc.honsenDates = pickedDates.honsen.filter(d=>d);
+    sc.honsenStart = sc.honsenDates.length > 0 ? fromVal(sc.honsenDates[0]) : null;
+    sc.honsenEnd = sc.honsenDates.length > 0 ? fromVal(sc.honsenDates[sc.honsenDates.length-1]) : null;
   } else {
-    t.honsenDates = [];
-    t.honsenStart = fromVal(document.getElementById('inp-honsen-start').value);
-    t.honsenEnd = fromVal(document.getElementById('inp-honsen-end').value);
+    sc.honsenDates = [];
+    sc.honsenStart = fromVal(document.getElementById('inp-honsen-start').value);
+    sc.honsenEnd = fromVal(document.getElementById('inp-honsen-end').value);
+  }
+
+  if(isNew){
+    t.schedules.push(sc);
+    currentScheduleIndex = t.schedules.length - 1;
   }
 
   saveToDB();
@@ -2405,6 +2554,20 @@ function saveEntry(){
   setTimeout(()=>badge.style.display='none',2000);
   renderGantt();
   updateConflicts();
+  renderScheduleTabs(t);
+  document.getElementById('deleteScheduleRow').style.display = (t.schedules.length>1) ? 'block' : 'none';
+}
+
+function deleteCurrentSchedule(){
+  const t = tournaments.find(x=>x.id===currentEntryId);
+  if(!t || t.schedules.length<=1) return;
+  if(!confirm('このスケジュール（年代・性別の組み合わせ）を削除しますか？')) return;
+  t.schedules.splice(currentScheduleIndex,1);
+  saveToDB();
+  if(t.isCustom) saveCustomTournaments();
+  renderGantt();
+  updateConflicts();
+  selectEntry(t.id, 0);
 }
 
 function updateConflicts(){
@@ -2414,15 +2577,23 @@ function updateConflicts(){
     return;
   }
 
-  // エントリー済みかつ本戦日が入力されている大会のみ対象
-  const entered = tournaments.filter(t => t.entered && (t.honsenDates && t.honsenDates.length > 0 || t.honsenStart));
+  // エントリー済みかつ本戦日が入力されているスケジュールのみ対象
+  const entered = [];
+  tournaments.forEach(t=>{
+    t.schedules.forEach(sc=>{
+      if(sc.entered && ((sc.honsenDates && sc.honsenDates.length > 0) || sc.honsenStart)){
+        entered.push({t, sc});
+      }
+    });
+  });
 
   const conflicts = [];
   for(let i=0; i<entered.length; i++){
     for(let j=i+1; j<entered.length; j++){
       const a = entered[i], b = entered[j];
-      const aDates = getHonsenDates(a);
-      const bDates = getHonsenDates(b);
+      if(a.t.id === b.t.id) continue; // 同じ大会内の別スケジュール同士（年代違いなど）は比較しない
+      const aDates = getHonsenDates(a.sc);
+      const bDates = getHonsenDates(b.sc);
       // 1日でも重なったらダブルエントリー
       const overlap = [...aDates].filter(d => bDates.has(d));
       if(overlap.length > 0){
@@ -2435,7 +2606,7 @@ function updateConflicts(){
     const enteredCount = entered.length;
     div.innerHTML = enteredCount === 0
       ? '<div class="no-conflict"><div class="icon">📋</div>エントリー済み大会に<br>本戦日を入力してください</div>'
-      : '<div class="no-conflict"><div class="icon">✓</div>ダブルエントリーなし！<br>（本戦日入力済み: '+enteredCount+'大会）</div>';
+      : '<div class="no-conflict"><div class="icon">✓</div>ダブルエントリーなし！<br>（本戦日入力済み: '+enteredCount+'件）</div>';
     return;
   }
 
@@ -2444,13 +2615,15 @@ function updateConflicts(){
       const dt = new Date(d);
       return (dt.getMonth()+1)+'/'+(dt.getDate());
     }).join('、');
-    const colorA = GRADE_COLOR[c.a.grade]||'#52597a';
-    const colorB = GRADE_COLOR[c.b.grade]||'#52597a';
+    const colorA = GRADE_COLOR[c.a.t.grade]||'#52597a';
+    const colorB = GRADE_COLOR[c.b.t.grade]||'#52597a';
+    const tagA = c.a.t.schedules.length>1 ? ' <span class="schedule-tag">U'+c.a.sc.ages.join('・U')+' / '+c.a.sc.genders.join('・')+'</span>' : '';
+    const tagB = c.b.t.schedules.length>1 ? ' <span class="schedule-tag">U'+c.b.sc.ages.join('・U')+' / '+c.b.sc.genders.join('・')+'</span>' : '';
     return '<div class="de-warning">' +
       '<div class="de-warning-title">⚠ 本戦日が重複しています</div>' +
       '<div class="de-warning-names">' +
-      '<span style="color:'+colorA+';font-weight:700">['+c.a.grade+']</span> '+c.a.name+'<br>' +
-      '<span style="color:'+colorB+';font-weight:700">['+c.b.grade+']</span> '+c.b.name +
+      '<span style="color:'+colorA+';font-weight:700">['+c.a.t.grade+']</span> '+c.a.t.name+tagA+'<br>' +
+      '<span style="color:'+colorB+';font-weight:700">['+c.b.t.grade+']</span> '+c.b.t.name+tagB +
       '</div>' +
       '<div style="margin-top:5px;color:var(--deadline);font-size:13px;font-weight:700">重複日: '+overlapStr+'</div>' +
       '</div>';
@@ -2460,10 +2633,11 @@ function updateConflicts(){
 // URLs
 function updateURLs(){
   const div = document.getElementById('urlList');
-  const withUrl = tournaments.filter(t=>t.url||t.customUrl);
+  const withUrl = tournaments.filter(t=>t.url || t.schedules.some(sc=>sc.customUrl));
   div.innerHTML = withUrl.map(t=>{
     const color=GRADE_COLOR[t.grade]||'#52597a';
-    const url=t.customUrl||t.url;
+    const scCustomUrl = t.schedules.map(sc=>sc.customUrl).find(u=>u);
+    const url = scCustomUrl || t.url;
     return `<div class="url-item">
       <div class="url-name">${t.name}<span class="url-grade" style="background:${color}">${t.grade}</span></div>
       <a class="url-link" href="${url}" target="_blank">${url}</a>
@@ -2486,20 +2660,36 @@ function loadCustomTournaments(){
         // ISOStringをローカル日付として解釈し直す
         return new Date(d.getFullYear(), d.getMonth(), d.getDate());
       };
-      customTournaments = parsed.map(ct => ({
-        ...ct,
-        start: toDate(ct.start),
-        end: toDate(ct.end),
-        deadline: toDate(ct.deadline),
-        yosenStart: toDate(ct.yosenStart),
-        yosenEnd: toDate(ct.yosenEnd),
-        honsenStart: toDate(ct.honsenStart),
-        honsenEnd: toDate(ct.honsenEnd),
-        yobi: toDate(ct.yobi),
-        yosenDates: ct.yosenDates || [],
-        honsenDates: ct.honsenDates || [],
-        isCustom: true
-      }));
+      customTournaments = parsed.map(ct => {
+        const ages = ct.ages || [12,14,16,18];
+        const genders = ct.genders || ['男','女'];
+        let schedules;
+        if(Array.isArray(ct.schedules)){
+          schedules = ct.schedules.map(sc => ({
+            ages: sc.ages || ages.slice(), genders: sc.genders || genders.slice(),
+            deadline: toDate(sc.deadline),
+            yosenStart: toDate(sc.yosenStart), yosenEnd: toDate(sc.yosenEnd), yosenDates: sc.yosenDates || [],
+            honsenStart: toDate(sc.honsenStart), honsenEnd: toDate(sc.honsenEnd), honsenDates: sc.honsenDates || [],
+            yobi: toDate(sc.yobi), memo: sc.memo || '', customUrl: sc.customUrl || '', entered: sc.entered || false
+          }));
+        } else {
+          // 旧形式（大会につきスケジュール1つを直接保存）からの移行
+          schedules = [{
+            ages: ages.slice(), genders: genders.slice(),
+            deadline: toDate(ct.deadline),
+            yosenStart: toDate(ct.yosenStart), yosenEnd: toDate(ct.yosenEnd), yosenDates: ct.yosenDates || [],
+            honsenStart: toDate(ct.honsenStart), honsenEnd: toDate(ct.honsenEnd), honsenDates: ct.honsenDates || [],
+            yobi: toDate(ct.yobi), memo: ct.memo || '', customUrl: ct.customUrl || '', entered: ct.entered || false
+          }];
+        }
+        return {
+          id: ct.id, name: ct.name, grade: ct.grade,
+          start: toDate(ct.start), end: toDate(ct.end),
+          ages, genders, sds: ct.sds || ['S'], url: ct.url || '',
+          schedules,
+          isCustom: true
+        };
+      });
     }
     // tournamentsに結合
     customTournaments.forEach(ct => {
@@ -2512,15 +2702,22 @@ function loadCustomTournaments(){
 
 function saveCustomTournaments(){
   const toSave = customTournaments.map(ct => ({
-    ...ct,
+    id: ct.id, name: ct.name, grade: ct.grade,
     start: ct.start ? ct.start.toISOString() : null,
     end: ct.end ? ct.end.toISOString() : null,
-    deadline: ct.deadline ? ct.deadline.toISOString() : null,
-    yosenStart: ct.yosenStart ? ct.yosenStart.toISOString() : null,
-    yosenEnd: ct.yosenEnd ? ct.yosenEnd.toISOString() : null,
-    honsenStart: ct.honsenStart ? ct.honsenStart.toISOString() : null,
-    honsenEnd: ct.honsenEnd ? ct.honsenEnd.toISOString() : null,
-    yobi: ct.yobi ? ct.yobi.toISOString() : null,
+    ages: ct.ages, genders: ct.genders, sds: ct.sds, url: ct.url,
+    schedules: ct.schedules.map(sc => ({
+      ages: sc.ages, genders: sc.genders,
+      deadline: sc.deadline ? sc.deadline.toISOString() : null,
+      yosenStart: sc.yosenStart ? sc.yosenStart.toISOString() : null,
+      yosenEnd: sc.yosenEnd ? sc.yosenEnd.toISOString() : null,
+      yosenDates: sc.yosenDates || [],
+      honsenStart: sc.honsenStart ? sc.honsenStart.toISOString() : null,
+      honsenEnd: sc.honsenEnd ? sc.honsenEnd.toISOString() : null,
+      honsenDates: sc.honsenDates || [],
+      yobi: sc.yobi ? sc.yobi.toISOString() : null,
+      memo: sc.memo, customUrl: sc.customUrl, entered: sc.entered || false
+    }))
   }));
   try { localStorage.setItem('jt2026_custom', JSON.stringify(toSave)); } catch(e){}
 }
@@ -2546,6 +2743,7 @@ function addCustomTournament(){
     return new Date(yr, mo-1, da);
   };
   const newId = 10000 + customTournaments.length + Date.now() % 1000;
+  const finalGenders = genders.length > 0 ? genders : ['男','女'];
 
   const ct = {
     id: newId,
@@ -2554,16 +2752,20 @@ function addCustomTournament(){
     start: fromVal(startVal),
     end: fromVal(endVal),
     ages,
-    genders: genders.length > 0 ? genders : ['男','女'],
+    genders: finalGenders,
     sds: sds.length > 0 ? sds : ['S'],
     url: document.getElementById('add-url').value,
-    memo: document.getElementById('add-memo').value,
-    deadline: fromVal(document.getElementById('add-deadline').value),
-    yosenStart: null, yosenEnd: null, yosenDates: [],
-    honsenStart: fromVal(document.getElementById('add-honsen-start').value),
-    honsenEnd: fromVal(document.getElementById('add-honsen-end').value),
-    honsenDates: [],
-    yobi: null, customUrl: '', entered: false,
+    schedules: [{
+      ages: ages.slice(), genders: finalGenders.slice(),
+      deadline: fromVal(document.getElementById('add-deadline').value),
+      yosenStart: null, yosenEnd: null, yosenDates: [],
+      honsenStart: fromVal(document.getElementById('add-honsen-start').value),
+      honsenEnd: fromVal(document.getElementById('add-honsen-end').value),
+      honsenDates: [],
+      yobi: null,
+      memo: document.getElementById('add-memo').value,
+      customUrl: '', entered: false
+    }],
     isCustom: true
   };
 
@@ -2935,9 +3137,10 @@ const DEADLINE_DEFAULTS = {
 
 function applyDeadlineDefaults(){
   tournaments.forEach(t => {
-    if(!t.deadline && DEADLINE_DEFAULTS[t.name]){
+    const sc = t.schedules[0];
+    if(sc && !sc.deadline && DEADLINE_DEFAULTS[t.name]){
       const [yr,mo,da] = DEADLINE_DEFAULTS[t.name].split('-').map(Number);
-      t.deadline = new Date(yr, mo-1, da);
+      sc.deadline = new Date(yr, mo-1, da);
     }
   });
 }
@@ -2947,27 +3150,32 @@ function printSchedule(){
   const filtered = getFiltered().slice().sort((a,b)=>a.start-b.start);
   const fmt = dt => dt ? (dt.getMonth()+1)+'/'+dt.getDate() : '未入力';
   const rangeFmt = (s,e) => s ? fmt(s)+(e&&e.getTime()!==s.getTime()?'〜'+fmt(e):'') : '未入力';
-  const rows = filtered.map(t=>{
-    const yosen = (t.yosenDates&&t.yosenDates.length) ? t.yosenDates.map(x=>{const dt=new Date(x);return (dt.getMonth()+1)+'/'+dt.getDate();}).join('・') : rangeFmt(t.yosenStart,t.yosenEnd);
-    const honsen = (t.honsenDates&&t.honsenDates.length) ? t.honsenDates.map(x=>{const dt=new Date(x);return (dt.getMonth()+1)+'/'+dt.getDate();}).join('・') : rangeFmt(t.honsenStart,t.honsenEnd);
-    return '<tr>' +
-      '<td>'+(t.entered?'✓':'')+'</td>' +
-      '<td>'+t.grade+'</td>' +
-      '<td>'+t.name.replace(/</g,'&lt;')+'</td>' +
-      '<td>'+rangeFmt(t.start,t.end)+'</td>' +
-      '<td>'+fmt(t.deadline)+'</td>' +
-      '<td>'+yosen+'</td>' +
-      '<td>'+honsen+'</td>' +
-      '<td>'+(t.memo||'').replace(/</g,'&lt;')+'</td>' +
-    '</tr>';
-  }).join('');
+  const rows = [];
+  filtered.forEach(t=>{
+    const multi = t.schedules.length > 1;
+    t.schedules.forEach(sc=>{
+      const yosen = (sc.yosenDates&&sc.yosenDates.length) ? sc.yosenDates.map(x=>{const dt=new Date(x);return (dt.getMonth()+1)+'/'+dt.getDate();}).join('・') : rangeFmt(sc.yosenStart,sc.yosenEnd);
+      const honsen = (sc.honsenDates&&sc.honsenDates.length) ? sc.honsenDates.map(x=>{const dt=new Date(x);return (dt.getMonth()+1)+'/'+dt.getDate();}).join('・') : rangeFmt(sc.honsenStart,sc.honsenEnd);
+      const nameCell = t.name.replace(/</g,'&lt;') + (multi ? ' <small>(U'+sc.ages.join('・U')+' / '+sc.genders.join('・')+')</small>' : '');
+      rows.push('<tr>' +
+        '<td>'+(sc.entered?'✓':'')+'</td>' +
+        '<td>'+t.grade+'</td>' +
+        '<td>'+nameCell+'</td>' +
+        '<td>'+rangeFmt(t.start,t.end)+'</td>' +
+        '<td>'+fmt(sc.deadline)+'</td>' +
+        '<td>'+yosen+'</td>' +
+        '<td>'+honsen+'</td>' +
+        '<td>'+(sc.memo||'').replace(/</g,'&lt;')+'</td>' +
+      '</tr>');
+    });
+  });
   const today = new Date();
   document.getElementById('printArea').innerHTML =
     '<div class="print-title">関東ジュニアテニス 大会カレンダー 2026</div>' +
     '<div class="print-meta">印刷日: '+(today.getMonth()+1)+'/'+today.getDate()+'/'+today.getFullYear()+'　表示中 '+filtered.length+'件</div>' +
     '<table class="print-table"><thead><tr>' +
     '<th>済</th><th>Grade</th><th>大会名</th><th>期間</th><th>締切</th><th>予選</th><th>本戦</th><th>メモ</th>' +
-    '</tr></thead><tbody>'+rows+'</tbody></table>';
+    '</tr></thead><tbody>'+rows.join('')+'</tbody></table>';
   window.print();
 }
 
@@ -2975,25 +3183,30 @@ function printSchedule(){
 function icsEscape(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
 function icsDate(dt){ const p=n=>n<10?'0'+n:''+n; return dt.getFullYear()+p(dt.getMonth()+1)+p(dt.getDate()); }
 function exportICS(){
-  const entered = tournaments.filter(t=>t.entered);
-  if(entered.length===0){ alert('エントリー済みの大会がありません。まず「手入力・詳細」タブでエントリーにチェックを入れてください。'); return; }
+  let count = 0;
+  tournaments.forEach(t=>t.schedules.forEach(sc=>{ if(sc.entered) count++; }));
+  if(count===0){ alert('エントリー済みの大会がありません。まず「手入力・詳細」タブでエントリーにチェックを入れてください。'); return; }
   let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//kanto-jr-tennis-supporter//tennis-calendar//JP\r\nCALSCALE:GREGORIAN\r\n';
-  entered.forEach(t=>{
-    const s = t.honsenStart || t.yosenStart || t.start;
-    const e = t.honsenEnd || t.yosenEnd || t.end || s;
-    if(!s) return;
-    const endExclusive = new Date(e); endExclusive.setDate(endExclusive.getDate()+1);
-    const descParts = [];
-    if(t.memo) descParts.push(t.memo);
-    if(t.customUrl||t.url) descParts.push(t.customUrl||t.url);
-    ics += 'BEGIN:VEVENT\r\n';
-    ics += 'UID:jt2026-'+t.id+'@kanto-jr-tennis-supporter\r\n';
-    ics += 'DTSTAMP:'+icsDate(new Date())+'T000000Z\r\n';
-    ics += 'DTSTART;VALUE=DATE:'+icsDate(s)+'\r\n';
-    ics += 'DTEND;VALUE=DATE:'+icsDate(endExclusive)+'\r\n';
-    ics += 'SUMMARY:'+icsEscape('['+t.grade+'] '+t.name)+'\r\n';
-    if(descParts.length) ics += 'DESCRIPTION:'+icsEscape(descParts.join('\n'))+'\r\n';
-    ics += 'END:VEVENT\r\n';
+  tournaments.forEach(t=>{
+    t.schedules.forEach((sc, scIdx)=>{
+      if(!sc.entered) return;
+      const s = sc.honsenStart || sc.yosenStart || t.start;
+      const e = sc.honsenEnd || sc.yosenEnd || t.end || s;
+      if(!s) return;
+      const endExclusive = new Date(e); endExclusive.setDate(endExclusive.getDate()+1);
+      const descParts = [];
+      if(sc.memo) descParts.push(sc.memo);
+      if(sc.customUrl||t.url) descParts.push(sc.customUrl||t.url);
+      const tag = t.schedules.length>1 ? ' (U'+sc.ages.join('・U')+' / '+sc.genders.join('・')+')' : '';
+      ics += 'BEGIN:VEVENT\r\n';
+      ics += 'UID:jt2026-'+t.id+(scIdx>0?('-'+scIdx):'')+'@kanto-jr-tennis-supporter\r\n';
+      ics += 'DTSTAMP:'+icsDate(new Date())+'T000000Z\r\n';
+      ics += 'DTSTART;VALUE=DATE:'+icsDate(s)+'\r\n';
+      ics += 'DTEND;VALUE=DATE:'+icsDate(endExclusive)+'\r\n';
+      ics += 'SUMMARY:'+icsEscape('['+t.grade+'] '+t.name+tag)+'\r\n';
+      if(descParts.length) ics += 'DESCRIPTION:'+icsEscape(descParts.join('\n'))+'\r\n';
+      ics += 'END:VEVENT\r\n';
+    });
   });
   ics += 'END:VCALENDAR\r\n';
   const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
