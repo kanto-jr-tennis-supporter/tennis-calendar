@@ -2187,6 +2187,8 @@ function renderGantt(){
     const expiredCls = expired ? ' is-expired-row' : '';
     const rowBg = getMonthBands();
     const multi = t.schedules.length > 1;
+    const barLeft = dayOffset(t.start)*DAY_W;
+    const barW = Math.max(3, (dayOffset(t.end)+1 - dayOffset(t.start))*DAY_W);
 
     t.schedules.forEach((sc, scIdx) => {
       const enteredCls = sc.entered ? ' is-entered' : '';
@@ -2194,7 +2196,11 @@ function renderGantt(){
       const hasHonsen = (sc.honsenDates && sc.honsenDates.length > 0) || !!sc.honsenStart;
       const honsenPendingBadge = (sc.entered && !hasHonsen) ? '<span class="honsen-pending-badge">⏳ 本戦日 入力待ち</span>' : '';
       const checkedAttr = sc.entered ? 'checked' : '';
+      const barGlow = sc.entered ? ';box-shadow:0 0 6px '+color+';outline:1px solid #2e7d32;' : '';
       const scheduleTag = multi ? '<span class="schedule-tag">U'+sc.ages.join('・U')+' / '+sc.genders.join('・')+'</span>' : '';
+      // 締切・予選・本戦・予備日のいずれも未入力なら、PDFから取り込んだ大会全体の
+      // 公式期間をそのまま表示する（編集を加えたスケジュールはそちらを優先表示）
+      const hasAnyInput = !!(sc.deadline || sc.yosenStart || (sc.yosenDates&&sc.yosenDates.length) || sc.honsenStart || (sc.honsenDates&&sc.honsenDates.length) || sc.yobi);
 
       // ===== 締切バッジ（大会名の下に日付・残り日数をテキスト表示）=====
       let deadlineBadge;
@@ -2299,18 +2305,23 @@ function renderGantt(){
       // タイムライン列 - 締切・予選・本戦・予備日を1つの帯にまとめる
       html += '<div class="gantt-row-timeline" style="width:'+totalW+'px;height:'+rowH+'px;position:relative" onmousemove="showTip(event,'+t.id+','+scIdx+')" onmouseleave="hideTip()">';
       html += rowBg;
-      if(yosenBar){
-        html += yosenBar;
+      if(!hasAnyInput){
+        // まだ何も入力されていないスケジュールは、公式の大会期間バーを表示
+        html += '<div style="position:absolute;left:'+barLeft+'px;width:'+barW+'px;top:32px;height:20px;background:'+color+';border-radius:3px;opacity:0.8'+barGlow+'"></div>';
       } else {
-        html += '<div style="position:absolute;left:4px;top:'+(YOSEN_TOP-2)+'px;font-size:11px;color:var(--text3)">予選 --</div>';
+        if(yosenBar){
+          html += yosenBar;
+        } else {
+          html += '<div style="position:absolute;left:4px;top:'+(YOSEN_TOP-2)+'px;font-size:11px;color:var(--text3)">予選 --</div>';
+        }
+        if(honsenBar){
+          html += honsenBar;
+          html += yobiDot;
+        } else {
+          html += '<div style="position:absolute;left:4px;top:'+(HONSEN_TOP-2)+'px;font-size:11px;color:var(--text3)">本戦 --</div>';
+        }
+        html += dlMarker;
       }
-      if(honsenBar){
-        html += honsenBar;
-        html += yobiDot;
-      } else {
-        html += '<div style="position:absolute;left:4px;top:'+(HONSEN_TOP-2)+'px;font-size:11px;color:var(--text3)">本戦 --</div>';
-      }
-      html += dlMarker;
       html += '</div>';
 
       html += '</div>'; // row
